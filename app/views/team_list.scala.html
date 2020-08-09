@@ -1,0 +1,32 @@
+@(teams: Seq[Team], pk: String)(implicit header: RequestHeader)
+@main("Teams List", pk) {
+    @if(teams.isEmpty) {
+        <div class="jumbotron jumbotron-fluid">
+            <div class="container d-flex justify-content-center ">
+                <p class="lead">
+                    You are not a member of any teams yet!
+            </div>
+        </div>
+    } else {
+        <h4>Your teams</h4>
+        @for(team <- teams) {
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">@team.name</h5>
+                    <p style="white-space: pre-line" class="card-text">@team.description</p>
+                    <span data-toggle="modal" data-target="#modal@team.id">
+                        <a href="@routes.Controller.proposals(team.id)">
+                            <button id="proposalBtn" onclick="toggleLoader()" data-toggle="tooltip" data-placement="top" title="@{team.pendingNum} proposal(s) need your attention!" type="button" class="btn btn-outline-primary">
+                                <span id="loader" hidden class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                                Proposals <span class="badge badge-light">@{team.pendingNum}</span>
+                            </button>
+
+                        </a>
+                    </span>
+                </div>
+            </div>
+            <br/>
+        }
+
+    }
+}

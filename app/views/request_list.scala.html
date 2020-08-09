@@ -1,0 +1,27 @@
+@import views.html.helper.CSRF
+@import models.Request
+@(reqs: Seq[Request], team: Team, pk: String)(implicit header: RequestHeader)
+    @main("Proposals", pk) {
+    <div class="container d-flex justify-content-center ">
+        <p class="lead">@team.name Proposals</p>
+    </div>
+    @if(reqs.isEmpty) {
+        <div class="jumbotron jumbotron-fluid">
+                <div class="container d-flex justify-content-center ">
+                    <p class="lead">No proposal yet for this team!</p>
+                </div>
+            </div>
+        } else {
+            @for(req <- reqs) {
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 data-toggle="tooltip" data-placement="top" title="@req.amount ERGs" class="card-title">@req.title</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">@req.status</h6>
+                        <p style="white-space: pre-line" class="card-text">@req.description</p>
+                    </div>
+                </div>
+                <br/>
+            }
+
+        }
+    }
