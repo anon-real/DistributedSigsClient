@@ -18,7 +18,7 @@ object Client {
     if (res.isError) throw new Throwable(s"Error getting info from server! $res")
     val js = Json.parse(res.body)
     val team = Team((js \\ "team").head)
-    val proposals = (js \\ "proposals").head.as[List[JsValue]].map(req => Request(req)).toSeq
+    val proposals = (js \\ "proposals").head.as[List[JsValue]].map(req => Request(req))
     (team, proposals)
   }
 }
