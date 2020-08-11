@@ -12,16 +12,15 @@ object RequestStatus {
   val paid = "Fund Paid"
 }
 
-case class Team(name: String, description: String, address: String, pendingNum: Int, id: Long)
+case class Team(name: String, description: String, address: String, pendingNum: Int, memberId: Long, id: Long)
 
 object Team {
-  def apply(team: JsValue): Team = {
+  def apply(team: JsValue, memberId: Long = 0L, pending: Int = 0): Team = {
     val name = (team \\ "name").head.as[String]
     val desc = (team \\ "description").head.as[String]
     val address = (team \\ "address").head.as[String]
     val id = (team \\ "id").head.as[Long]
-    val pendingNum = (team \ "pendingNum").asOpt[Int].getOrElse(0)
-    Team(name, desc, address, pendingNum, id)
+    Team(name, desc, address, pending, memberId, id)
   }
 }
 

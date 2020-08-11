@@ -17,7 +17,6 @@
                     <span data-toggle="modal" data-target="#modal@team.id">
                         <a href="@routes.Controller.proposals(team.id)">
                             <button id="proposalBtn" onclick="toggleLoader()" data-toggle="tooltip" data-placement="top" title="@{team.pendingNum} proposal(s) need your attention!" type="button" class="btn btn-outline-primary">
-                                <span id="loader" hidden class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
                                 Proposals <span class="badge badge-light">@{team.pendingNum}</span>
                             </button>
 

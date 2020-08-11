@@ -1,5 +1,7 @@
 package controllers
 
+import java.util.UUID
+
 import akka.actor.ActorSystem
 import javax.inject._
 import play.api.mvc._
@@ -15,6 +17,41 @@ class Controller @Inject()(cc: ControllerComponents, actorSystem: ActorSystem)(i
    */
   def home = Action { implicit request =>
     Ok(views.html.team_list(Client.getTeams, Conf.pk))
+  }
+
+  def rejectProposal(reqId: Long) = Action(parse.json) { implicit request =>
+    // TODO insert into db
+    val memberId = (request.body \\ "memberId").head.as[Long]
+    val serverRes = Client.approveProposal(reqId, memberId, "")
+    if (serverRes) {
+      Ok(
+        s"""{
+           |  "reload": true
+           |}""".stripMargin).as("application/json")
+    } else {
+      BadRequest(
+        s"""{
+           |  "message": "Server returned error when trying to post commitment!"
+           |}""".stripMargin).as("application/json")
+    }
+  }
+
+  def approveProposal(reqId: Long) = Action(parse.json) { implicit request =>
+    // TODO insert into db
+    val memberId = (request.body \\ "memberId").head.as[Long]
+    val a = UUID.randomUUID().toString; // TODO get from node
+    val serverRes = Client.approveProposal(reqId, memberId, a)
+    if (serverRes) {
+      Ok(
+        s"""{
+           |  "reload": true
+           |}""".stripMargin).as("application/json")
+    } else {
+      BadRequest(
+        s"""{
+           |  "message": "Server returned error when trying to post commitment!"
+           |}""".stripMargin).as("application/json")
+    }
   }
 
   def proposals(teamId: Long) = Action { implicit request =>

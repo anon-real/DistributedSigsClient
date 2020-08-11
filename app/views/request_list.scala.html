@@ -43,9 +43,9 @@
 
                     <div class="row justify-content-center">
                         @if(req.isPending) {
-                            @if(req.iApproved) {
+                            @if(req.pendingMe) {
                                 <div class="btn-group dropdown m-1">
-                                    <button id="approveBtn" onclick="approveProp(@req.id)" class="btn btn-outline-success btn-sm" type="button">
+                                    <button id="approveBtn" onclick="approveProp(@req.id, @team.memberId)" class="btn btn-outline-success btn-sm" type="button">
                                         <span id="approveLoader" hidden class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
                                         Approve
                                     </button>
@@ -67,7 +67,7 @@
                                 </div>
 
                                 <div class="btn-group dropdown m-1">
-                                    <button onclick="rejectProp(@req.id)" id="rejectBtn" class="btn btn-outline-danger btn-sm" type="button">
+                                    <button onclick="rejectProp(@req.id, @team.memberId)" id="rejectBtn" class="btn btn-outline-danger btn-sm" type="button">
                                         <span id="rejectLoader" hidden class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
                                         Reject
                                     </button>

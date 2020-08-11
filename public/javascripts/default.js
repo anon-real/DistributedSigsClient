@@ -3,34 +3,56 @@ document.addEventListener('DOMContentLoaded', function () {
         $('[data-toggle="tooltip"]').tooltip()
     });
 
+    document.getElementById('modalOkBtn').addEventListener('click', approveOrReject);
 }, false);
 
 function toggleLoader(e) {
     $('#loader').prop("hidden", false);
 }
 
-function approveProp(id) {
+url = "";
+data = {};
+function approveOrReject() {
+    function toggleButtons(status = true) {
+        $('#approveLoader').prop("hidden", !status);
+        $('#approveBtn').prop("disabled", status);
+        $('#rejectBtn').prop("disabled", status);
+    }
+
+    toggleButtons();
+    $("#propModal").modal("toggle");
+    posting = $.ajax({
+        url: url,
+        type: "POST",
+        data: JSON.stringify(data),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (data, textStatus) {
+            if (data.reload) {
+                location.reload()
+            }
+            toggleButtons(false);
+        },
+        error: function (data) {
+            alert("request failed: " + data.responseJSON.message)
+            toggleButtons(false);
+        }
+    });
+
+}
+
+function approveProp(id, memberId) {
     document.getElementById('modalTitle').innerHTML = "Approval";
     document.getElementById('modalBody').innerHTML = "Are you sure you want to approve this proposal?";
-    document.getElementById('modalOkBtn').addEventListener('click', function () {
-        $('#approveLoader').prop("hidden", false);
-        $('#approveBtn').prop("disabled", true);
-        $('#rejectBtn').prop("disabled", true);
-        $("#propModal").modal("toggle")
-        // tell server about it and toggle loader and enable btn!
-    });
+    url = "/proposal/" + id + "/approve";
+    data = {"memberId": memberId};
     $("#propModal").modal("show")
 }
 
-function rejectProp(id) {
+function rejectProp(id, memberId) {
     document.getElementById('modalTitle').innerHTML = "Rejection";
     document.getElementById('modalBody').innerHTML = "Are you sure you want to reject this proposal?";
-    document.getElementById('modalOkBtn').addEventListener('click', function () {
-        $('#rejectLoader').prop("hidden", false);
-        $('#rejectBtn').prop("disabled", true);
-        $('#approveBtn').prop("disabled", true);
-        $("#propModal").modal("toggle")
-        // tell server about it and toggle loader and enable btn!
-    });
+    url = "/proposal/" + id + "/reject";
+    data = {"memberId": memberId};
     $("#propModal").modal("show")
 }
