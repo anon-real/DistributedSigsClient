@@ -7,6 +7,9 @@ import scalaj.http.Http
 object Client {
   private val defaultHeader: Seq[(String, String)] = Seq[(String, String)](("Content-Type", "application/json"))
 
+  /**
+   * gets list of teams the client is a member of
+   */
   def getTeams: Seq[Team] = {
     val res = Http(s"${Conf.serverUrl}/getTeams/${Conf.pk}").headers(defaultHeader).asString
     if (res.isError) throw new Throwable(s"Error getting info from server! $res")
@@ -17,6 +20,9 @@ object Client {
     })
   }
 
+  /**
+   * gets list of proposals relating a team
+   */
   def getProposals(teamId: Long): (Team, Seq[Request]) = {
     val res = Http(s"${Conf.serverUrl}/getProposals/$teamId/${Conf.pk}").headers(defaultHeader).asString
     if (res.isError) throw new Throwable(s"Error getting info from server! $res")
@@ -27,17 +33,30 @@ object Client {
     (team, proposals)
   }
 
+  /**
+   * sends approval request to the server for a proposal
+   * @return a boolean specifying whether the operation was successful
+   */
   def approveProposal(reqId: Long, memberId: Long, a: String): Boolean = {
     val res = Http(s"${Conf.serverUrl}/request/$reqId/newCommitment").postData(
       s"""{
         |  "a": "$a",
         |  "memberId": $memberId
         |}""".stripMargin).headers(defaultHeader).asString
-    if (res.isError) false
-    else true
+    !res.isError
   }
 
-  def getMemberId(teamId: Long): Long = {
-    2L
+  /**
+   * gets a new commitment from node!
+   * @return (a, r)
+   */
+  def produceCommitment(): (String, String) = {
+    val res = Http(s"${Conf.nodeUrl}/script/generateCommitment").postData(
+      s"""{
+        |  "op": -51,
+        |  "h": "${Conf.pk}"
+        |}""".stripMargin).headers(defaultHeader).asString
+    val js = Json.parse(res.body)
+    ((js \\ "a").head.as[String], (js \\ "r").head.as[String])
   }
 }

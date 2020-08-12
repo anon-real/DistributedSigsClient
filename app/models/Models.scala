@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets
 
 import play.api.libs.json.JsValue
 import utils.Conf
+import utils.Util._
 
 object RequestStatus {
   val pendingApproval = "Pending Approval"
@@ -52,6 +53,10 @@ case class Request(title: String, amount: Long, description: String, address: St
   def numRejected: Int = commitments.count(_.isRejected)
 
   def numApproved: Int = commitments.count(_.isApproved)
+
+  def sortedCmts: Seq[Commitment] = {
+    commitments.sortBy(cmt => boolAsInt(cmt.isApproved) + boolAsInt(cmt.isMine)).reverse
+  }
 }
 
 object Request {
@@ -68,7 +73,6 @@ object Request {
   }
 }
 
-
 case class Commitment(member: Member, a: String, reqId: Long, memId: Long) {
   def isMine: Boolean = member.pk == Conf.pk
 
@@ -76,7 +80,12 @@ case class Commitment(member: Member, a: String, reqId: Long, memId: Long) {
 
   def isApproved: Boolean = !isRejected
 
-  override def toString: String = member.nickName + s" (${member.pk.slice(0, 15)}...)"
+  override def toString: String = {
+    var postfix = "rejected"
+    if (isApproved) postfix = "approved"
+    if (isMine) s"${member.nickName} (YOU) $postfix"
+    else s"${member.nickName} (${member.pk.slice(0, 15)}...) $postfix"
+  }
 }
 
 object Commitment {
@@ -92,3 +101,5 @@ object Commitment {
 case class Transaction(reqId: Long, isPartial: Boolean, bytes: Array[Byte], isValid: Boolean, isConfirmed: Boolean, pk: String) {
     override def toString: String = new String(bytes, StandardCharsets.UTF_16)
 }
+
+case class Secret(a: String, r: String)

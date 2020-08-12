@@ -3,14 +3,20 @@ package controllers
 import java.util.UUID
 
 import akka.actor.ActorSystem
+import dao.SecretDAO
 import javax.inject._
+import models.Secret
+import play.api.Logger
 import play.api.mvc._
 import utils.{Client, Conf, Util}
+import utils.Util._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class Controller @Inject()(cc: ControllerComponents, actorSystem: ActorSystem)(implicit exec: ExecutionContext) extends AbstractController(cc) {
+class Controller @Inject()(secrets: SecretDAO, cc: ControllerComponents, actorSystem: ActorSystem)(implicit exec: ExecutionContext) extends AbstractController(cc) {
+
+  private val logger: Logger = Logger(this.getClass)
 
   /**
    * Home! shows list of teams which user participate in!
@@ -20,9 +26,10 @@ class Controller @Inject()(cc: ControllerComponents, actorSystem: ActorSystem)(i
   }
 
   def rejectProposal(reqId: Long) = Action(parse.json) { implicit request =>
-    // TODO insert into db
+    logger.info(s"rejecting proposal with id $reqId")
+
     val memberId = (request.body \\ "memberId").head.as[Long]
-    val serverRes = Client.approveProposal(reqId, memberId, "")
+    val serverRes = Client.approveProposal(reqId, memberId, "") // empty commitment means rejection!
     if (serverRes) {
       Ok(
         s"""{
@@ -36,26 +43,40 @@ class Controller @Inject()(cc: ControllerComponents, actorSystem: ActorSystem)(i
     }
   }
 
-  def approveProposal(reqId: Long) = Action(parse.json) { implicit request =>
-    // TODO insert into db
+  def approveProposal(reqId: Long) = Action(parse.json).async { implicit request =>
+    logger.info(s"approving proposal with id $reqId")
+    val (a, r) = Client.produceCommitment()
+    logger.info(s"generated commitment $a for the proposal")
     val memberId = (request.body \\ "memberId").head.as[Long]
-    val a = UUID.randomUUID().toString; // TODO get from node
     val serverRes = Client.approveProposal(reqId, memberId, a)
     if (serverRes) {
-      Ok(
-        s"""{
-           |  "reload": true
-           |}""".stripMargin).as("application/json")
+      secrets.insert(Secret(a, r)).map(_ => {
+        logger.info("commitment sent to server successfully, also saved in local db with the secret.")
+        Ok(
+          s"""{
+             |  "reload": true
+             |}""".stripMargin).as("application/json")
+
+      }).recover {
+        case e: Exception => BadRequest(
+          s"""{
+             |  "message": "local db error: ${e.getMessage}"
+             |}""".stripMargin).as("application/json")
+      }
     } else {
-      BadRequest(
-        s"""{
-           |  "message": "Server returned error when trying to post commitment!"
-           |}""".stripMargin).as("application/json")
+      logger.info("server returned error response for the commitment!")
+      Future {
+        BadRequest(
+          s"""{
+             |  "message": "Server returned error when trying to post commitment!"
+             |}""".stripMargin).as("application/json")
+      }
     }
   }
 
   def proposals(teamId: Long) = Action { implicit request =>
     val res = Client.getProposals(teamId)
-    Ok(views.html.request_list(res._2, res._1, Conf.pk))
+    val props = res._2.sortBy(p => boolAsInt(p.isPending) + boolAsInt(p.pendingMe)).reverse
+    Ok(views.html.request_list(props, res._1, Conf.pk))
   }
 }

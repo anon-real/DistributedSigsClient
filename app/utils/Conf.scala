@@ -9,6 +9,8 @@ object Conf {
 
   lazy val serverUrl: String = readKey("server.url")
   lazy val pk: String = readKey("pk")
+  lazy val nodeUrl: String = readKey("node.url")
+
 
   def readKey(key: String, default: String = null): String = {
     try {
