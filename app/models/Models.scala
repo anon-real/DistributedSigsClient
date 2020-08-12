@@ -17,10 +17,10 @@ case class Team(name: String, description: String, address: String, pendingNum: 
 
 object Team {
   def apply(team: JsValue, memberId: Long = 0L, pending: Int = 0): Team = {
-    val name = (team \\ "name").head.as[String]
-    val desc = (team \\ "description").head.as[String]
-    val address = (team \\ "address").head.as[String]
-    val id = (team \\ "id").head.as[Long]
+    val name = (team \ "name").as[String]
+    val desc = (team \ "description").as[String]
+    val address = (team \ "address").as[String]
+    val id = (team \ "id").as[Long]
     Team(name, desc, address, pending, memberId, id)
   }
 }
@@ -29,10 +29,10 @@ case class Member(pk: String, teamId: Long, nickName: String, id: Long)
 
 object Member {
   def apply(member: JsValue): Member = {
-    val nickName = (member \\ "nickName").head.as[String]
-    val pk = (member \\ "pk").head.as[String]
-    val id = (member \\ "id").head.as[Long]
-    val teamId = (member \\ "teamId").head.as[Long]
+    val nickName = (member \ "nickName").as[String]
+    val pk = (member \ "pk").as[String]
+    val id = (member \ "id").as[Long]
+    val teamId = (member \ "teamId").as[Long]
     new Member(pk, teamId, nickName, id)
   }
 }
@@ -61,14 +61,14 @@ case class Request(title: String, amount: Long, description: String, address: St
 
 object Request {
   def apply(proposal: JsValue): Request = {
-    val title = (proposal \\ "title").head.as[String]
-    val description = (proposal \\ "description").head.as[String]
-    val address = (proposal \\ "address").head.as[String]
-    val status = (proposal \\ "status").head.as[String]
-    val amount = (proposal \\ "amount").head.as[Long]
-    val id = (proposal \\ "id").head.as[Long]
-    val teamId = (proposal \\ "teamId").head.as[Long]
-    val commitments = (proposal \\ "commitments").head.as[Seq[JsValue]].map(cmt => Commitment(cmt))
+    val title = (proposal \ "title").as[String]
+    val description = (proposal \ "description").as[String]
+    val address = (proposal \ "address").as[String]
+    val status = (proposal \ "status").as[String]
+    val amount = (proposal \ "amount").as[Long]
+    val id = (proposal \ "id").as[Long]
+    val teamId = (proposal \ "teamId").as[Long]
+    val commitments = (proposal \ "commitments").as[Seq[JsValue]].map(cmt => Commitment(cmt))
     Request(title, amount, description, address, teamId, status, commitments, id)
   }
 }
@@ -90,10 +90,10 @@ case class Commitment(member: Member, a: String, reqId: Long, memId: Long) {
 
 object Commitment {
   def apply(cmt: JsValue): Commitment = {
-    val member = Member((cmt \\ "member").head.as[JsValue])
-    val a = (cmt \\ "a").head.as[String]
-    val reqId = (cmt \\ "requestId").head.as[Long]
-    val memId = (cmt \\ "memberId").head.as[Long]
+    val member = Member((cmt \ "member").as[JsValue])
+    val a = (cmt \ "a").as[String]
+    val reqId = (cmt \ "requestId").as[Long]
+    val memId = (cmt \ "memberId").as[Long]
     Commitment(member, a, reqId, memId)
   }
 }

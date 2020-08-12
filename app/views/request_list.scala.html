@@ -22,8 +22,41 @@
             </div>
         </div>
 
-        <div class="container d-flex justify-content-center ">
-            <p class="lead">@team.name Proposals</p>
+    <div class="modal fade" id="decisionModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="decisionTitle" class="modal-title"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Mart this proposal as <b>completely</b> approved/rejected based on collected approvals and rejections.</p>
+                    <p>So if no matter what, current state of approvals/rejections are enough to make the decision about this proposal, do so.</p>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" value="option1" checked>
+                        <label class="form-check-label" for="exampleRadios1">
+                            Mark as Approved
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2" value="option2">
+                        <label class="form-check-label" for="exampleRadios2">
+                            Mark as Rejected
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button onclick="decideProp()" type="button" class="btn btn-primary">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container d-flex justify-content-center ">
+        <p class="lead">@team.name Proposals</p>
         </div>
         @if(reqs.isEmpty) {
             <div class="jumbotron jumbotron-fluid">
@@ -42,8 +75,8 @@
                             @if(req.isPending) {
                                 @if(req.pendingMe) {
                                     <div class="btn-group dropdown m-1">
-                                        <button id="approveBtn" onclick="approveProp(@req.id, @team.memberId)" class="btn btn-outline-success btn-sm" type="button">
-                                        <span id="approveLoader" hidden class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                                        <button id="approveBtn-@req.id" onclick="approveProp(@req.id, @team.memberId)" class="btn btn-outline-success btn-sm" type="button">
+                                        <span id="approveLoader-@req.id" hidden class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
                                         Approve
                                         </button>
                                         <button type="button" class="btn btn-sm btn-outline-success dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -64,8 +97,8 @@
                                     </div>
 
                                     <div class="btn-group dropdown m-1">
-                                        <button onclick="rejectProp(@req.id, @team.memberId)" id="rejectBtn" class="btn btn-outline-danger btn-sm" type="button">
-                                        <span id="rejectLoader" hidden class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                                        <button onclick="rejectProp(@req.id, @team.memberId)" id="rejectBtn-@req.id" class="btn btn-outline-danger btn-sm" type="button">
+                                        <span id="rejectLoader-@req.id" hidden class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
                                         Reject
                                         </button>
                                         <button type="button" class="btn btn-sm btn-outline-danger dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -86,9 +119,10 @@
                                     </div>
 
                                 } else {
+                                    <p>@req.id</p>
                                     <div class="btn-group dropdown m-1">
-                                        <button id="approveBtn" onclick="approveProp(@req.id, @team.memberId)" class="btn btn-outline-secondary btn-sm" type="button">
-                                        <span id="approveLoader" hidden class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                                        <button id="decisionBtn-@req.id" onclick="openDecisionModal(@req.id, @team.memberId, '@req.title')" class="btn btn-outline-secondary btn-sm" type="button">
+                                        <span id="decisionLoader-@req.id" hidden class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
                                         Complete the decision
                                         </button>
                                         <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

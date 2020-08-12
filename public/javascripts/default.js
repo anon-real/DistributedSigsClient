@@ -12,15 +12,9 @@ function toggleLoader(e) {
 
 url = "";
 data = {};
-function approveOrReject() {
-    function toggleButtons(status = true) {
-        $('#approveLoader').prop("hidden", !status);
-        $('#approveBtn').prop("disabled", status);
-        $('#rejectBtn').prop("disabled", status);
-    }
+reqId = -1;
 
-    toggleButtons();
-    $("#propModal").modal("toggle");
+function sendRequest(toggleButtons) {
     posting = $.ajax({
         url: url,
         type: "POST",
@@ -38,7 +32,18 @@ function approveOrReject() {
             toggleButtons(false);
         }
     });
+}
 
+function approveOrReject() {
+    function toggleButtons(status = true) {
+        $('#approveLoader-' + reqId).prop("hidden", !status);
+        $('#approveBtn-' + reqId).prop("disabled", status);
+        $('#rejectBtn-' + reqId).prop("disabled", status);
+    }
+
+    toggleButtons();
+    $("#propModal").modal("toggle");
+    sendRequest(toggleButtons)
 }
 
 function approveProp(id, memberId) {
@@ -46,6 +51,7 @@ function approveProp(id, memberId) {
     document.getElementById('modalBody').innerHTML = "Are you sure you want to approve this proposal?";
     url = "/proposal/" + id + "/approve";
     data = {"memberId": memberId};
+    reqId = id;
     $("#propModal").modal("show")
 }
 
@@ -54,5 +60,26 @@ function rejectProp(id, memberId) {
     document.getElementById('modalBody').innerHTML = "Are you sure you want to reject this proposal?";
     url = "/proposal/" + id + "/reject";
     data = {"memberId": memberId};
+    reqId = id;
     $("#propModal").modal("show")
+}
+
+function openDecisionModal(id, memberId, reqName) {
+    url = "/proposal/" + id;
+    data = {"memberId": memberId};
+    document.getElementById('decisionTitle').innerHTML = reqName + " Final Decision";
+    reqId = id;
+    $("#decisionModal").modal("show")
+}
+
+function decideProp() {
+    data["approved"] = document.getElementById("exampleRadios1").checked;
+    function toggleButtons(status = true) {
+        console.log(reqId);
+        $('#decisionLoader-' + reqId).prop("hidden", !status);
+        $('#decisionBtn-' + reqId).prop("disabled", status);
+    }
+
+    toggleButtons();
+    $("#decisionModal").modal("toggle");
 }
