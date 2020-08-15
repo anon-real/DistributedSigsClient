@@ -52,8 +52,7 @@ class Controller @Inject()(secrets: SecretDAO, cc: ControllerComponents, actorSy
     if (serverRes) {
       secrets.insert(Secret(a, r)).map(_ => {
         logger.info("commitment sent to server successfully, also saved in local db with the secret.")
-        Ok(
-          s"""{
+        Ok(s"""{
              |  "reload": true
              |}""".stripMargin).as("application/json")
 
@@ -71,6 +70,22 @@ class Controller @Inject()(secrets: SecretDAO, cc: ControllerComponents, actorSy
              |  "message": "Server returned error when trying to post commitment!"
              |}""".stripMargin).as("application/json")
       }
+    }
+  }
+
+  def proposalDecision(reqId: Long) = Action(parse.json) { implicit request =>
+    val approved = (request.body \\ "decision").head.as[Boolean]
+    val (res, msg) = Client.proposalDecision(reqId, approved)
+    if (res) {
+      Ok(s"""{
+           |  "reload": true
+           |}""".stripMargin
+      ).as("application/json")
+    } else {
+      BadRequest(s"""{
+           |  "message": "$msg!"
+           |}""".stripMargin
+      ).as("application/json")
     }
   }
 

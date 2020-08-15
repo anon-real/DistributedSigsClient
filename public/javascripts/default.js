@@ -65,21 +65,21 @@ function rejectProp(id, memberId) {
 }
 
 function openDecisionModal(id, memberId, reqName) {
-    url = "/proposal/" + id;
-    data = {"memberId": memberId};
     document.getElementById('decisionTitle').innerHTML = reqName + " Final Decision";
     reqId = id;
     $("#decisionModal").modal("show")
 }
 
 function decideProp() {
-    data["approved"] = document.getElementById("exampleRadios1").checked;
     function toggleButtons(status = true) {
         console.log(reqId);
         $('#decisionLoader-' + reqId).prop("hidden", !status);
         $('#decisionBtn-' + reqId).prop("disabled", status);
-    }
+    };
 
+    url = "/proposal/" + reqId + "/decide";
+    data = {"decision": document.getElementById("exampleRadios1").checked};
     toggleButtons();
     $("#decisionModal").modal("toggle");
+    sendRequest(toggleButtons)
 }
