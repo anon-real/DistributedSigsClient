@@ -8,7 +8,7 @@ import javax.inject._
 import models.Secret
 import play.api.Logger
 import play.api.mvc._
-import utils.{Client, Conf, Util}
+import utils.{Conf, Node, Server, Util}
 import utils.Util._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -22,14 +22,14 @@ class Controller @Inject()(secrets: SecretDAO, cc: ControllerComponents, actorSy
    * Home! shows list of teams which user participate in!
    */
   def home = Action { implicit request =>
-    Ok(views.html.team_list(Client.getTeams, Conf.pk))
+    Ok(views.html.team_list(Server.getTeams, Conf.pk))
   }
 
   def rejectProposal(reqId: Long) = Action(parse.json) { implicit request =>
     logger.info(s"rejecting proposal with id $reqId")
 
     val memberId = (request.body \\ "memberId").head.as[Long]
-    val serverRes = Client.approveProposal(reqId, memberId, "") // empty commitment means rejection!
+    val serverRes = Server.approveProposal(reqId, memberId, "") // empty commitment means rejection!
     if (serverRes) {
       Ok(
         s"""{
@@ -45,12 +45,12 @@ class Controller @Inject()(secrets: SecretDAO, cc: ControllerComponents, actorSy
 
   def approveProposal(reqId: Long) = Action(parse.json).async { implicit request =>
     logger.info(s"approving proposal with id $reqId")
-    val (a, r) = Client.produceCommitment()
+    val (a, r) = Node.produceCommitment()
     logger.info(s"generated commitment $a for the proposal")
     val memberId = (request.body \\ "memberId").head.as[Long]
-    val serverRes = Client.approveProposal(reqId, memberId, a)
+    val serverRes = Server.approveProposal(reqId, memberId, a)
     if (serverRes) {
-      secrets.insert(Secret(a, r)).map(_ => {
+      secrets.insert(Secret(a, r, reqId)).map(_ => {
         logger.info("commitment sent to server successfully, also saved in local db with the secret.")
         Ok(s"""{
              |  "reload": true
@@ -75,7 +75,7 @@ class Controller @Inject()(secrets: SecretDAO, cc: ControllerComponents, actorSy
 
   def proposalDecision(reqId: Long) = Action(parse.json) { implicit request =>
     val approved = (request.body \\ "decision").head.as[Boolean]
-    val (res, msg) = Client.proposalDecision(reqId, approved)
+    val (res, msg) = Server.proposalDecision(reqId, approved)
     if (res) {
       Ok(s"""{
            |  "reload": true
@@ -90,7 +90,7 @@ class Controller @Inject()(secrets: SecretDAO, cc: ControllerComponents, actorSy
   }
 
   def proposals(teamId: Long) = Action { implicit request =>
-    val res = Client.getProposals(teamId)
+    val res = Server.getProposals(teamId)
     val props = res._2.sortBy(p => boolAsInt(p.isPending) + boolAsInt(p.pendingMe)).reverse
     Ok(views.html.request_list(props, res._1, Conf.pk))
   }

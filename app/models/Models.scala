@@ -37,7 +37,7 @@ object Member {
   }
 }
 
-case class Request(title: String, amount: Long, description: String, address: String, teamId: Long, status: String, commitments: Seq[Commitment], id: Long) {
+case class Request(title: String, amount: Double, description: String, address: String, teamId: Long, status: String, commitments: Seq[Commitment], id: Long) {
   def isRejected: Boolean = status == RequestStatus.rejected
 
   def isApproved: Boolean = status == RequestStatus.approved
@@ -65,7 +65,7 @@ object Request {
     val description = (proposal \ "description").as[String]
     val address = (proposal \ "address").as[String]
     val status = (proposal \ "status").as[String]
-    val amount = (proposal \ "amount").as[Long]
+    val amount = (proposal \ "amount").as[Double]
     val id = (proposal \ "id").as[Long]
     val teamId = (proposal \ "teamId").as[Long]
     val commitments = (proposal \ "commitments").as[Seq[JsValue]].map(cmt => Commitment(cmt))
@@ -102,4 +102,19 @@ case class Transaction(reqId: Long, isPartial: Boolean, bytes: Array[Byte], isVa
     override def toString: String = new String(bytes, StandardCharsets.UTF_16)
 }
 
-case class Secret(a: String, r: String)
+case class Secret(a: String, r: String, requestId: Long)
+
+case class Box(id: String, value: Long, registers: String)
+
+case class Proof(memberId: Long, reqId: Long, proof: String, simulated: Boolean)
+
+object Proof {
+  def apply(proof: JsValue): Proof = {
+    val memberId = (proof \ "memberId").as[Long]
+    val reqId = (proof \ "requestId").as[Long]
+    val p = (proof \ "proof").get.toString()
+    val simulated = (proof \ "simulated").as[Boolean]
+    Proof(memberId, reqId, p, simulated)
+  }
+}
+
