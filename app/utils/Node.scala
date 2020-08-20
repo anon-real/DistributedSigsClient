@@ -134,4 +134,14 @@ object Node {
       (true, res.body)
     }
   }
+
+  def isTxOk(tx: String): Boolean = {
+    val res = Http(s"${Conf.nodeUrl}/transactions/check").postData(tx).headers(defaultHeader).asString
+    res.isSuccess
+  }
+
+  def broadcastTx(tx: String): Boolean = {
+    val res = Http(s"${Conf.nodeUrl}/transactions").postData(tx).headers(defaultHeader).asString
+    res.isSuccess
+  }
 }

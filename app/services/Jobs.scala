@@ -1,9 +1,9 @@
 package services
 
 import akka.actor.{Actor, ActorLogging}
-import dao.SecretDAO
+import dao.{SecretDAO, TransactionDAO}
 import javax.inject.Inject
-import models.Team
+import models.{Team, Transaction}
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import utils.{Conf, Explorer, Node, Server}
@@ -14,7 +14,7 @@ object JobsUtil {
   val handleApproved = "handle approved"
 }
 
-class Jobs(secrets: SecretDAO) extends Actor with ActorLogging {
+class Jobs(secrets: SecretDAO, transactions: TransactionDAO) extends Actor with ActorLogging {
   private val logger: Logger = Logger(this.getClass)
   private var teams: Seq[Team] = Nil
 
@@ -39,13 +39,34 @@ class Jobs(secrets: SecretDAO) extends Actor with ActorLogging {
             val cmnts = Server.getCommitments(prop.id).filter(_.a.nonEmpty).filterNot(_.a.equals(secret.a))
             val proofs = Server.getProofs(prop.id)
             if (proofs.size == cmnts.size + 1) {
+
               logger.info(s"all proofs have been gathered for proposal ${prop.id}, we will assemble the tx")
               val fProofs: Seq[String] = proofs.map(proof => {
                 Json.parse(proof.proof).as[Seq[JsValue]].map(_.toString()).mkString(",")
               })
-              val (ok, signed) = Node.signTx(tx, secret, fProofs)
+
+              val (ok, signed) = {
+                if (transactions.exists(prop.id)) (true, transactions.byId(prop.id).toString)
+                else {
+                  var (ok, signed) = Node.signTx(tx, secret, fProofs)
+                  if (ok && Node.isTxOk(signed)) {
+                    transactions.insert(Transaction(prop.id, signed.getBytes("utf-16")))
+                  } else {
+                    ok = false
+                    logger.error(s"final assembled transaction is not valid for proposal ${prop.id}")
+                  }
+                  (ok, signed)
+                }
+              }
               if (ok) {
-                if (prop.id != 1 && prop.id != 33 && prop.id != 34) logger.error(signed)
+                  val id = (Json.parse(signed) \ "id").as[String]
+                  if (Explorer.getTxConfirmationNum(id) >= 3) {
+                    logger.info("transaction is confirmed, will mark proposal as paid.")
+                    Server.setProposalPaid(prop.id, id)
+                  } else {
+                    logger.info(s"will broadcast transaction $id to be mined.")
+                    Node.broadcastTx(signed)
+                  }
               } else logger.error(s"could not assemble tx for proposal ${prop.id}")
 
             } else {
@@ -72,7 +93,7 @@ class Jobs(secrets: SecretDAO) extends Actor with ActorLogging {
                   if (proofs.isEmpty) {
                     logger.info(s"we will simulate for proposal ${prop.id}")
                     val simulated = Server.getMembers(team.id).map(_.pk).filterNot(mem => cmnts.map(_.member.pk).contains(mem))
-                        .filterNot(_ == Conf.pk)
+                      .filterNot(_ == Conf.pk)
                     val (ok, hints) = Node.extractHints(signed, Seq(Conf.pk), simulated)
                     if (ok) {
                       if (Server.setProof(prop.id, isSimulated = true, team.memberId, hints))

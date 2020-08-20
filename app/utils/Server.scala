@@ -122,4 +122,12 @@ object Server {
       false
     } else true
   }
+
+  def setProposalPaid(reqId: Long, txId: String): Boolean = {
+    val res = Http(s"${Conf.serverUrl}/proposal/$reqId/paid").postData(
+      s"""{
+         |  "txId": "$txId"
+         |}""".stripMargin).headers(defaultHeader).asString
+    res.isSuccess
+  }
 }

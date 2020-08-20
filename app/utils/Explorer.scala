@@ -15,4 +15,16 @@ object Explorer {
     val js = Json.parse(res.body)
     js.as[Seq[JsValue]].map(box => Box((box \ "id").as[String] , (box \ "value").as[Long], (box \ "additionalRegisters").get.toString))
   }
+
+  /**
+   * gets transaction confirmation count from explorer
+   */
+  def getTxConfirmationNum(id: String): Int = {
+    val res = Http(s"${Conf.explorerUrl}/api/v0/transactions/$id").headers(defaultHeader).asString
+    if (res.isError) -1
+    else {
+      val js = Json.parse(res.body)
+      (js \\ "confirmationsCount").head.as[Int]
+    }
+  }
 }

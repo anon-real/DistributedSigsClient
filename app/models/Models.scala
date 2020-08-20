@@ -98,7 +98,7 @@ object Commitment {
   }
 }
 
-case class Transaction(reqId: Long, isPartial: Boolean, bytes: Array[Byte], isValid: Boolean, isConfirmed: Boolean, pk: String) {
+case class Transaction(reqId: Long, bytes: Array[Byte]) {
     override def toString: String = new String(bytes, StandardCharsets.UTF_16)
 }
 
