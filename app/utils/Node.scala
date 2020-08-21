@@ -23,11 +23,23 @@ object Node {
     ((js \\ "a").head.as[String], (js \\ "r").head.as[String])
   }
 
+  /**
+   * gets box as raw
+   * @param boxId box id
+   * @return string representing the raw box
+   */
   def getBoxRaw(boxId: String): String = {
     val res = Http(s"${Conf.nodeUrl}/utxo/byIdBinary/$boxId").headers(defaultHeader).asString
     (Json.parse(res.body) \ "bytes").as[String]
   }
 
+  /**
+   * generates an unsigned tx
+   * @param sourceAddr source address for input boxes
+   * @param amount amount
+   * @param destAddr address to send amount to
+   * @return (success, tx), i.e. was generation successful and the tx itself
+   */
   def generateUnsignedTx(sourceAddr: String, amount: Long, destAddr: String): (Boolean, String) = {
     val fee = 2000000
     var need = amount + fee
@@ -73,6 +85,13 @@ object Node {
     }
   }
 
+  /**
+   * generates an unsigned tx
+   * @param tx transaction to sign
+   * @param secret secret associated with the proposal (commitment)
+   * @param proofs other partial proofs needed
+   * @return (success, tx) signs the tx, used for simulation, partial proof generation and signing the assembled tx
+   */
   def signTx(tx: String, secret: Secret, proofs: Seq[String]): (Boolean, String) = {
     val mySec =
       s"""
@@ -107,6 +126,13 @@ object Node {
     }
   }
 
+  /**
+   * extracts hints from a signed tx
+   * @param tx tx
+   * @param real real signers
+   * @param simulated simulated
+   * @return (success, hints)
+   */
   def extractHints(tx: String, real: Seq[String], simulated: Seq[String]): (Boolean, String) = {
     val realR = real.map(r =>
       s"""{
@@ -135,11 +161,21 @@ object Node {
     }
   }
 
+  /**
+   * checks to see if tx is ok
+   * @param tx transaction
+   * @return whether tx is ok or not
+   */
   def isTxOk(tx: String): Boolean = {
     val res = Http(s"${Conf.nodeUrl}/transactions/check").postData(tx).headers(defaultHeader).asString
     res.isSuccess
   }
 
+  /**
+   * broadcasts tx
+   * @param tx transaction
+   * @return whether it was successful or not
+   */
   def broadcastTx(tx: String): Boolean = {
     val res = Http(s"${Conf.nodeUrl}/transactions").postData(tx).headers(defaultHeader).asString
     res.isSuccess

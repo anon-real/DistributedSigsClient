@@ -28,20 +28,37 @@ class SecretDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
 
   val secrets = TableQuery[SecretTable]
 
+  /**
+   * inserts a secret into db
+   * @param secret secret
+   */
   def insert(secret: Secret): Future[Unit] = {
     db.run(secrets += secret).map(_ => ())
   }
 
+  /**
+   * whether secret exists
+   * @param reqId proposal id
+   * @return boolean result
+   */
   def exists(reqId: Long): Boolean = {
     val res = db.run(secrets.filter(_.requestId === reqId).exists.result)
     Await.result(res, 5.second)
   }
 
+  /**
+   * @param a 'a' in the commitment
+   * @return secret associated with 'a'
+   */
   def byA(a: String): Secret = {
     val res = db.run(secrets.filter(_.a === a).result.head)
     Await.result(res, 5.second)
   }
 
+  /**
+   * @param reqId proposal id
+   * @return secret associated with the proposal id
+   */
   def byRequestId(reqId: Long): Secret = {
     val res = db.run(secrets.filter(_.requestId === reqId).result.head)
     Await.result(res, 5.second)

@@ -27,13 +27,25 @@ class TransactionDAO @Inject() (protected val dbConfigProvider: DatabaseConfigPr
 
   val transactions = TableQuery[TransactionTable]
 
+  /**
+   * inserts a tx into db
+   * @param transaction transaction
+   */
   def insert(transaction: Transaction): Future[Unit] = db.run(transactions += transaction).map(_ => ())
 
+  /**
+   * @param reqId proposal id
+   * @return transaction associated with the proposal id
+   */
   def byId(reqId: Long): Transaction = {
     val res = db.run(transactions.filter(tx => tx.requestId === reqId).result.head)
     Await.result(res, 5.second)
   }
 
+  /**
+   * @param reqId proposal id
+   * @return whether tx exists for a specific proposal or not
+   */
   def exists(reqId: Long): Boolean = {
     val res = db.run(transactions.filter(_.requestId === reqId).exists.result)
     Await.result(res, 5.second)

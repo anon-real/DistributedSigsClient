@@ -25,6 +25,9 @@ class Controller @Inject()(secrets: SecretDAO, cc: ControllerComponents, actorSy
     Ok(views.html.team_list(Server.getTeams, Conf.pk))
   }
 
+  /**
+   * endpoint to reject a proposal.
+   */
   def rejectProposal(reqId: Long) = Action(parse.json) { implicit request =>
     logger.info(s"rejecting proposal with id $reqId")
 
@@ -43,6 +46,9 @@ class Controller @Inject()(secrets: SecretDAO, cc: ControllerComponents, actorSy
     }
   }
 
+  /**
+   * endpoint to approve a proposal
+   */
   def approveProposal(reqId: Long) = Action(parse.json).async { implicit request =>
     logger.info(s"approving proposal with id $reqId")
     val (a, r) = Node.produceCommitment()
@@ -73,6 +79,9 @@ class Controller @Inject()(secrets: SecretDAO, cc: ControllerComponents, actorSy
     }
   }
 
+  /**
+   * endpoint to make the final decision about the proposal
+   */
   def proposalDecision(reqId: Long) = Action(parse.json) { implicit request =>
     val approved = (request.body \\ "decision").head.as[Boolean]
     val (res, msg) = Server.proposalDecision(reqId, approved)
@@ -89,6 +98,9 @@ class Controller @Inject()(secrets: SecretDAO, cc: ControllerComponents, actorSy
     }
   }
 
+  /**
+   * list of proposal related to a specific team
+   */
   def proposals(teamId: Long) = Action { implicit request =>
     val res = Server.getProposals(teamId)
     val props = res._2.sortBy(p => boolAsInt(p.isPending) + boolAsInt(p.pendingMe)).reverse

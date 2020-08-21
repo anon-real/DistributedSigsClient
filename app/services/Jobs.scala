@@ -18,6 +18,9 @@ class Jobs(secrets: SecretDAO, transactions: TransactionDAO) extends Actor with 
   private val logger: Logger = Logger(this.getClass)
   private var teams: Seq[Team] = Nil
 
+  /**
+   * periodically handles proof and tx generation for approved proposals
+   */
   def receive = {
     case JobsUtil.handleApproved =>
       teams = Server.getTeams
@@ -26,6 +29,9 @@ class Jobs(secrets: SecretDAO, transactions: TransactionDAO) extends Actor with 
       Try(handleProof)
   }
 
+  /**
+   * handles proof generation for proposals
+   */
   def handleProof: Unit = {
     try {
       logger.info("handling proof generation...")
@@ -122,6 +128,9 @@ class Jobs(secrets: SecretDAO, transactions: TransactionDAO) extends Actor with 
 
   }
 
+  /**
+   * handles transaction generation for proposals
+   */
   def handleTxGeneration: Unit = {
     try {
       logger.info("handling tx generation...")
