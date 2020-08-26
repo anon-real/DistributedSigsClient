@@ -14,7 +14,7 @@ Before running the client app you should do the configuration. You can find the 
 
 ## Running the code
 ### Development mode
-To run the code in development run `sbt "run 9001"` in the main directory to start the server. Load the UI in http://localhost:9001.
+To run the code in development run `sbt "run 9001"` in the main directory to start the client. Load the UI in http://localhost:9001.
 replace 9001 with your desired port.
 ### TODO run in production and binaries
 
