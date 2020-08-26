@@ -23,7 +23,7 @@ class StartupService @Inject()(protected val dbConfigProvider: DatabaseConfigPro
   val jobs = system.actorOf(Props(new Jobs(secrets, transactions)), "scheduler")
   system.scheduler.scheduleAtFixedRate(
     initialDelay = 5.seconds,
-    interval = 133.seconds,
+    interval = 30.seconds,
     receiver = jobs,
     message = JobsUtil.handleApproved
   )

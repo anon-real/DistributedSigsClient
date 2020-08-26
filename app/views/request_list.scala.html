@@ -1,26 +1,26 @@
 @import views.html.helper.CSRF
 @import models.Request
 @(reqs: Seq[Request], team: Team, pk: String)(implicit header: RequestHeader)
-    @main("Proposals", pk) {
-        <div class="modal fade" id="propModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalTitle">Modal title</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <p id="modalBody"></p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <button id="modalOkBtn" type="button" class="btn btn-primary">Ok</button>
-                    </div>
+@main("Proposals", pk) {
+    <div class="modal fade" id="propModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="modalBody"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button id="modalOkBtn" type="button" class="btn btn-primary">Ok</button>
                 </div>
             </div>
         </div>
+    </div>
 
     <div class="modal fade" id="decisionModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -32,8 +32,9 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>Mart this proposal as <b>completely</b> approved/rejected based on collected approvals and rejections.</p>
-                    <p>So if no matter what, current state of approvals/rejections are enough to make the decision about this proposal, do so.</p>
+                    <p>Mark this proposal as <b>completely</b>
+                        approved/rejected based on collected approvals and rejections.</p>
+                    <p>If current state of approvals/rejections are enough to make the decision about this proposal do so. For example, approve if 3 approvals are collected in case of 2 out of 4 signature</p>
                     <div class="form-check">
                         <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" value="option1" checked>
                         <label class="form-check-label" for="exampleRadios1">
@@ -57,97 +58,98 @@
 
     <div class="container d-flex justify-content-center ">
         <p class="lead">@team.name Proposals</p>
-        </div>
-        @if(reqs.isEmpty) {
-            <div class="jumbotron jumbotron-fluid">
-                <div class="container d-flex justify-content-center ">
-                    <p class="lead">No proposal yet for this team!</p>
-                </div>
+    </div>
+    @if(reqs.isEmpty) {
+        <div class="jumbotron jumbotron-fluid">
+            <div class="container d-flex justify-content-center ">
+                <p class="lead">No proposal yet for this team!</p>
             </div>
-        } else {
-            @for(req <- reqs) {
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 data-toggle="tooltip" data-placement="top" title="@req.amount ERGs" class="card-title">@req.title</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">@req.status </h6>
-                        <p style="white-space: pre-line" class="card-text">@req.description</p>
-                        <div class="justify-content-center">
-                            @if(req.isPending) {
-                                @if(req.pendingMe) {
-                                    <div class="btn-group dropdown m-1">
-                                        <button id="approveBtn-@req.id" onclick="approveProp(@req.id, @team.memberId)" class="btn btn-outline-success btn-sm" type="button">
-                                        <span id="approveLoader-@req.id" hidden class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-                                        Approve
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-outline-success dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            <div class="sr-only">Toggle Dropdown</div>
-                                        </button>
-                                        <div class="dropdown-menu">
-                                            @if(req.numApproved == 0) {
-                                                <a class="dropdown-item">No member has approved this proposal yet.</a>
-                                            }
-                                            @for(cmt <- req.commitments) {
-                                                @if(cmt.isApproved) {
-                                                    <a class="dropdown-item">@{
-                                                        cmt.toString
-                                                    }</a>
-                                                }
-                                            }
-                                        </div>
-                                    </div>
-
-                                    <div class="btn-group dropdown m-1">
-                                        <button onclick="rejectProp(@req.id, @team.memberId)" id="rejectBtn-@req.id" class="btn btn-outline-danger btn-sm" type="button">
-                                        <span id="rejectLoader-@req.id" hidden class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-                                        Reject
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-outline-danger dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            <span class="sr-only">Toggle Dropdown</span>
-                                        </button>
-                                        <div class="dropdown-menu">
-                                            @if(req.numRejected == 0) {
-                                                <a class="dropdown-item">No member has rejected this proposal yet.</a>
-                                            }
-                                            @for(cmt <- req.commitments) {
-                                                @if(cmt.isRejected) {
-                                                    <a class="dropdown-item">@{
-                                                        cmt.toString
-                                                    }</a>
-                                                }
-                                            }
-                                        </div>
-                                    </div>
-
-                                } else {
-                                    <div class="btn-group dropdown m-1">
-                                        <button id="decisionBtn-@req.id" onclick="openDecisionModal(@req.id, @team.memberId, '@req.title')" class="btn btn-outline-secondary btn-sm" type="button">
-                                        <span id="decisionLoader-@req.id" hidden class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-                                        Complete the decision
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            <div class="sr-only">Toggle Dropdown</div>
-                                        </button>
-                                        <div class="dropdown-menu">
-                                        @for(cmt <- req.sortedCmts) {
-                                            <a class="dropdown-item">@{cmt.toString}</a>
+        </div>
+    } else {
+        @for(req <- reqs) {
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 data-toggle="tooltip" data-placement="top" title="@req.amount ERGs" class="card-title">@req.title</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">@req.status </h6>
+                    <p style="white-space: pre-line" class="card-text">@req.description</p>
+                    <div class="justify-content-center">
+                        @if(req.isPending) {
+                            @if(req.pendingMe) {
+                                <div class="btn-group dropdown m-1">
+                                    <button id="approveBtn-@req.id" onclick="approveProp(@req.id, @team.memberId)" class="btn btn-outline-success btn-sm" type="button">
+                                    <span id="approveLoader-@req.id" hidden class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                                    Approve
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-success dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <div class="sr-only">Toggle Dropdown</div>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        @if(req.numApproved == 0) {
+                                            <a class="dropdown-item">No member has approved this proposal yet.</a>
                                         }
-                                        </div>
+                                        @for(cmt <- req.commitments) {
+                                            @if(cmt.isApproved) {
+                                                <a class="dropdown-item">@{
+                                                    cmt.toString
+                                                }</a>
+                                            }
+                                        }
                                     </div>
+                                </div>
 
-                                }
+                                <div class="btn-group dropdown m-1">
+                                    <button onclick="rejectProp(@req.id, @team.memberId)" id="rejectBtn-@req.id" class="btn btn-outline-danger btn-sm" type="button">
+                                    <span id="rejectLoader-@req.id" hidden class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                                    Reject
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        @if(req.numRejected == 0) {
+                                            <a class="dropdown-item">No member has rejected this proposal yet.</a>
+                                        }
+                                        @for(cmt <- req.commitments) {
+                                            @if(cmt.isRejected) {
+                                                <a class="dropdown-item">@{
+                                                    cmt.toString
+                                                }</a>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+
+                            } else {
+                                <div class="btn-group dropdown m-1">
+                                    <button id="decisionBtn-@req.id" onclick="openDecisionModal(@req.id, @team.memberId, '@req.title')" class="btn btn-outline-secondary btn-sm" type="button">
+                                    <span id="decisionLoader-@req.id" hidden class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                                    Complete the decision
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <div class="sr-only">Toggle Dropdown</div>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                    @for(cmt <- req.sortedCmts) {
+                                        <a class="dropdown-item">@{
+                                            cmt.toString
+                                        }</a>
+                                    }
+                                    </div>
+                                </div>
+
                             }
-                            @if(req.isApproved) {
+                        }
+                        @if(req.isApproved) {
 
-                            }
-                            @if(req.isRejected) {
+                        }
+                        @if(req.isRejected) {
 
-                            }
+                        }
 
-                        </div>
                     </div>
                 </div>
-                <br/>
-            }
-
+            </div>
+            <br/>
         }
     }
+}

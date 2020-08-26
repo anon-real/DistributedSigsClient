@@ -32,7 +32,7 @@ class Jobs(secrets: SecretDAO, transactions: TransactionDAO) extends Actor with 
   /**
    * handles proof generation for proposals
    */
-  def handleProof: Unit = {
+  def handleProof(): Unit = {
     try {
       logger.info("handling proof generation...")
       teams.foreach(team => {
@@ -129,9 +129,9 @@ class Jobs(secrets: SecretDAO, transactions: TransactionDAO) extends Actor with 
   }
 
   /**
-   * handles transaction generation for proposals
+   * handles unsigned transaction generation for proposals
    */
-  def handleTxGeneration: Unit = {
+  def handleTxGeneration(): Unit = {
     try {
       logger.info("handling tx generation...")
       teams.foreach(team => {
@@ -142,7 +142,7 @@ class Jobs(secrets: SecretDAO, transactions: TransactionDAO) extends Actor with 
             logger.info(s"we create unsigned tx for proposal: ${prop.id}")
             val (ok, tx) = Node.generateUnsignedTx(team.address, (prop.amount * 1e9).toLong, prop.address)
             if (!ok) logger.error(s"could not generate unsigned tx for proposal: ${prop.id}")
-            else Server.setTx(prop.id, isUnsigned = true, tx)
+            else Server.setTx(prop.id, tx)
           }
         })
       })

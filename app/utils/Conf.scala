@@ -7,13 +7,13 @@ object Conf {
   val config: Configuration = Configuration(ConfigFactory.load())
   private val logger: Logger = Logger(this.getClass)
 
-  lazy val serverUrl: String = readKey("server.url")
+  lazy val serverUrl: String = readKey("server.url").replaceAll("/$", "")
   lazy val pk: String = readKey("pk")
-  lazy val secret: String = readKey("externalDLog", "")
+  private lazy val secret: String = readKey("externalDLog", "")
   lazy val secretSeq: Seq[String] = if(secret.nonEmpty) Seq(secret) else Seq()
-  lazy val nodeUrl: String = readKey("node.url")
+  lazy val nodeUrl: String = readKey("node.url").replaceAll("/$", "")
   lazy val nodeApi: String = readKey("node.api_key", "")
-  lazy val explorerUrl: String = readKey("explorer.url")
+  lazy val explorerUrl: String = readKey("explorer.url").replaceAll("/$", "")
 
   def readKey(key: String, default: String = null): String = {
     try {
