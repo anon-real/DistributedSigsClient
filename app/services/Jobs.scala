@@ -65,14 +65,17 @@ class Jobs(secrets: SecretDAO, transactions: TransactionDAO) extends Actor with 
                 }
               }
               if (ok) {
-                  val id = (Json.parse(signed) \ "id").as[String]
-                  if (Explorer.getTxConfirmationNum(id) >= 3) {
-                    logger.info("transaction is confirmed, will mark proposal as paid.")
-                    Server.setProposalPaid(prop.id, id)
-                  } else {
-                    logger.info(s"will broadcast transaction $id to be mined.")
-                    Node.broadcastTx(signed)
-                  }
+                val id = (Json.parse(signed) \ "id").as[String]
+                val numConf = Explorer.getTxConfirmationNum(id)
+                if (numConf >= 3) {
+                  logger.info("transaction is confirmed, will mark proposal as paid.")
+                  Server.setProposalPaid(prop.id, id)
+                } else if (numConf == -1) {
+                  logger.info(s"will broadcast transaction $id to be mined.")
+                  Node.broadcastTx(signed)
+                } else {
+                  logger.info(s"transaction $id is already mined, waiting for enough confirmations to inform server.")
+                }
               } else logger.error(s"could not assemble tx for proposal ${prop.id}")
 
             } else {
