@@ -5,6 +5,8 @@ import play.api.Logger
 import play.api.libs.json._
 import scalaj.http.Http
 
+import scala.collection.mutable
+
 object Node {
   private val logger: Logger = Logger(this.getClass)
   private val defaultHeader: Seq[(String, String)] = Seq[(String, String)](("Content-Type", "application/json"), ("api_key", Conf.nodeApi))
@@ -36,36 +38,68 @@ object Node {
   /**
    * generates an unsigned tx
    * @param sourceAddr source address for input boxes
-   * @param amount amount
+   * @param ergAmount amount
    * @param destAddr address to send amount to
    * @return (success, tx), i.e. was generation successful and the tx itself
    */
-  def generateUnsignedTx(sourceAddr: String, amount: Long, destAddr: String): (Boolean, String) = {
+  def generateUnsignedTx(sourceAddr: String, ergAmount: Long, destAddr: String, tokenId: String = "", tokenAmount: Long = 0L): (Boolean, String) = {
     val fee = 2000000
-    var need = amount + fee
-    val boxes = Explorer.getUnspentBoxes(sourceAddr).takeWhile(box => {
-      need -= box.value
-      need + box.value > 0
-    })
-    if (need > 0) {
-      logger.error(s"not enough ergs to satisfy proposal $amount nano ergs!")
+    val needErg = ergAmount + fee
+    val boxes = Explorer.getUnspentBoxes(sourceAddr)
+
+    val sm = boxes.map(_.value).sum
+    val changeTokens: mutable.Map[String, Long] = mutable.Map.empty
+    boxes.foreach(box => box.tokens.foreach(token => {
+      changeTokens(token._1) = changeTokens.getOrElse(token._1, 0L) + token._2
+    }))
+
+    if (sm < needErg) {
+      logger.error(s"not enough ergs to satisfy proposal $ergAmount nano ergs!")
       return (false, "")
+    }
+    if (tokenId.nonEmpty) {
+      if (changeTokens(tokenId) < tokenAmount) {
+        logger.error(s"not enough token $tokenId to satisfy proposal $tokenAmount token!")
+        return (false, "")
+      }
+
+      changeTokens(tokenId) -= tokenAmount
+      if (changeTokens(tokenId) == 0) changeTokens.remove(tokenId)
+
+      if (changeTokens.nonEmpty && sm - needErg < 100000) {
+        logger.error(s"Although there is enough erg for the proposal we won't assemble tx! because we will lose tokens, need some more ergs for change box!")
+        return (false, "")
+      }
     }
     val inputsRaw = boxes.map(box => getBoxRaw(box.id))
     var endBoxes: Seq[String] = Nil
 
+    val changeAsset = changeTokens.map(token =>
+      s"""{
+        |  "tokenId": "${token._1}",
+        |  "amount": ${token._2}
+        |}""".stripMargin).mkString(",")
+    var requestAsset = ""
+    if (tokenId.nonEmpty) requestAsset =
+      s"""{
+         |  "tokenId": "$tokenId",
+         |  "amount": $tokenAmount
+         |}""".stripMargin
+
+
     endBoxes = endBoxes :+
       s"""{
         |  "address": "$destAddr",
-        |  "value": $amount
+        |  "value": $ergAmount,
+        |  "assets": [${requestAsset}]
         |}""".stripMargin
-    val sm = boxes.map(_.value).sum
-    if (sm > amount + fee) {
+    if (sm > ergAmount + fee) {
       endBoxes = endBoxes :+
         s"""{
            |  "address": "$sourceAddr",
-           |  "value": ${sm - amount - fee},
-           |  "registers": ${boxes.head.registers}
+           |  "value": ${sm - ergAmount - fee},
+           |  "registers": ${boxes.head.registers},
+           |  "assets": [$changeAsset]
            |}""".stripMargin
     }
     val request =

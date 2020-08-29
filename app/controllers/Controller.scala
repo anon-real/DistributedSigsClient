@@ -51,31 +51,40 @@ class Controller @Inject()(secrets: SecretDAO, cc: ControllerComponents, actorSy
    */
   def approveProposal(reqId: Long) = Action(parse.json).async { implicit request =>
     logger.info(s"approving proposal with id $reqId")
-    val (a, r) = Node.produceCommitment()
-    logger.info(s"generated commitment $a for the proposal")
-    val memberId = (request.body \\ "memberId").head.as[Long]
-    val serverRes = Server.approveProposal(reqId, memberId, a)
-    if (serverRes) {
-      secrets.insert(Secret(a, r, reqId)).map(_ => {
-        logger.info("commitment sent to server successfully, also saved in local db with the secret.")
-        Ok(s"""{
-             |  "reload": true
-             |}""".stripMargin).as("application/json")
+    try {
+      val (a, r) = Node.produceCommitment()
+      logger.info(s"generated commitment $a for the proposal")
+      val memberId = (request.body \\ "memberId").head.as[Long]
+      val serverRes = Server.approveProposal(reqId, memberId, a)
+      if (serverRes) {
+        secrets.insert(Secret(a, r, reqId)).map(_ => {
+          logger.info("commitment sent to server successfully, also saved in local db with the secret.")
+          Ok(s"""{
+                |  "reload": true
+                |}""".stripMargin).as("application/json")
 
-      }).recover {
-        case e: Exception => BadRequest(
-          s"""{
-             |  "message": "local db error: ${e.getMessage}"
-             |}""".stripMargin).as("application/json")
+        }).recover {
+          case e: Exception => BadRequest(
+            s"""{
+               |  "message": "local db error: ${e.getMessage}"
+               |}""".stripMargin).as("application/json")
+        }
+      } else {
+        logger.info("server returned error response for the commitment!")
+        Future {
+          BadRequest(
+            s"""{
+               |  "message": "Server returned error when trying to post commitment!"
+               |}""".stripMargin).as("application/json")
+        }
       }
-    } else {
-      logger.info("server returned error response for the commitment!")
-      Future {
-        BadRequest(
-          s"""{
-             |  "message": "Server returned error when trying to post commitment!"
-             |}""".stripMargin).as("application/json")
-      }
+    } catch {
+      case e: Throwable =>
+        logger.error(s"error while generating commitment! ${e.getMessage}")
+        Future{BadRequest(
+        s"""{
+           |  "message": "node error: ${e.getMessage}"
+           |}""".stripMargin).as("application/json")}
     }
   }
 

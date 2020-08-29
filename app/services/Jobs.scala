@@ -143,7 +143,9 @@ class Jobs(secrets: SecretDAO, transactions: TransactionDAO) extends Actor with 
           val (created, _) = Server.getUnsignedTx(prop.id)
           if (!created) {
             logger.info(s"we create unsigned tx for proposal: ${prop.id}")
-            val (ok, tx) = Node.generateUnsignedTx(team.address, (prop.amount * 1e9).toLong, prop.address)
+            var ergAmount = 1000000L // default nano ergs for token requests
+            if (team.tokenId.isEmpty) ergAmount = (prop.amount * 1e9).toLong
+            val (ok, tx) = Node.generateUnsignedTx(team.address, ergAmount, prop.address, team.tokenId, prop.amount.toLong)
             if (!ok) logger.error(s"could not generate unsigned tx for proposal: ${prop.id}")
             else Server.setTx(prop.id, tx)
           }

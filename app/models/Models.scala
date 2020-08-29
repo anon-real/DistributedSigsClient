@@ -13,15 +13,17 @@ object RequestStatus {
   val paid = "Fund Paid"
 }
 
-case class Team(name: String, description: String, address: String, pendingNum: Int, memberId: Long, id: Long)
+case class Team(name: String, description: String, address: String, assetName: String, tokenId: String, pendingNum: Int, memberId: Long, id: Long)
 
 object Team {
   def apply(team: JsValue, memberId: Long = 0L, pending: Int = 0): Team = {
     val name = (team \ "name").as[String]
     val desc = (team \ "description").as[String]
     val address = (team \ "address").as[String]
+    val assetName = (team \ "assetName").as[String]
+    val tokenId = (team \ "tokenId").as[String]
     val id = (team \ "id").as[Long]
-    Team(name, desc, address, pending, memberId, id)
+    Team(name, desc, address, assetName, tokenId, pending, memberId, id)
   }
 }
 
@@ -104,7 +106,7 @@ case class Transaction(reqId: Long, bytes: Array[Byte]) {
 
 case class Secret(a: String, r: String, requestId: Long)
 
-case class Box(id: String, value: Long, registers: String)
+case class Box(id: String, value: Long, registers: String, tokens: Seq[(String, Long)])
 
 case class Proof(memberId: Long, reqId: Long, proof: String, simulated: Boolean)
 

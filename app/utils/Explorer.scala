@@ -13,7 +13,10 @@ object Explorer {
   def getUnspentBoxes(address: String): Seq[Box] = {
     val res = Http(s"${Conf.explorerUrl}/api/v0/transactions/boxes/byAddress/unspent/$address").headers(defaultHeader).asString
     val js = Json.parse(res.body)
-    js.as[Seq[JsValue]].map(box => Box((box \ "id").as[String] , (box \ "value").as[Long], (box \ "additionalRegisters").get.toString))
+    js.as[Seq[JsValue]].map(box => {
+      val tokens = (box \ "assets").as[Seq[JsValue]].map(token => ((token \ "tokenId").as[String], (token \ "amount").as[Long]))
+      Box((box \ "id").as[String] , (box \ "value").as[Long], (box \ "additionalRegisters").get.toString, tokens)
+    })
   }
 
   /**
