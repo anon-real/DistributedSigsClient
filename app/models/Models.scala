@@ -20,8 +20,8 @@ object Team {
     val name = (team \ "name").as[String]
     val desc = (team \ "description").as[String]
     val address = (team \ "address").as[String]
-    val assetName = (team \ "assetName").as[String]
-    val tokenId = (team \ "tokenId").as[String]
+    val assetName = (team \ "assetName").asOpt[String].getOrElse("ERG")
+    val tokenId = (team \ "tokenId").asOpt[String].getOrElse("")
     val id = (team \ "id").as[Long]
     Team(name, desc, address, assetName, tokenId, pending, memberId, id)
   }

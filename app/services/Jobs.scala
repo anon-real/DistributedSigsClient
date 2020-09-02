@@ -25,8 +25,8 @@ class Jobs(secrets: SecretDAO, transactions: TransactionDAO) extends Actor with 
     case JobsUtil.handleApproved =>
       teams = Server.getTeams
       logger.info("Handling approved proposals...")
-      Try(handleTxGeneration)
-      Try(handleProof)
+      Try(handleTxGeneration())
+      Try(handleProof())
   }
 
   /**
@@ -127,6 +127,7 @@ class Jobs(secrets: SecretDAO, transactions: TransactionDAO) extends Actor with 
       logger.info("handling proof generation done")
     } catch {
       case e: Throwable => e.printStackTrace()
+        logger.error(e.getMessage)
     }
 
   }
