@@ -17,14 +17,16 @@ libraryDependencies ++= Seq(
   "org.scalaj" %% "scalaj-http" % "2.4.2",
   "com.h2database" % "h2" % "1.4.200",
   "com.typesafe.play" %% "play-slick" % "4.0.0",
-  "com.typesafe.play" %% "play-slick-evolutions" % "4.0.0"
+  "com.typesafe.play" %% "play-slick-evolutions" % "4.0.0",
+  "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test,
+  "com.github.tomakehurst" % "wiremock-standalone" % "2.27.1" % Test
 )
 
 unmanagedResourceDirectories in Test <+= baseDirectory(_ / "target/web/public/test")
 
 assemblyMergeStrategy in assembly := {
   case "logback.xml" => MergeStrategy.first
-  case PathList("META-INF", _ @ _*) => MergeStrategy.discard
+  case PathList("META-INF", _@_*) => MergeStrategy.discard
   case _ => MergeStrategy.first
 }
 
@@ -43,4 +45,6 @@ assemblyMergeStrategy in assembly := {
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
 }
+javaOptions in Test += "-Dconfig.file=conf/test.conf"
+
 
