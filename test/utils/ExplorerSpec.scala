@@ -12,6 +12,7 @@ import scala.io.Source.fromFile
 class ExplorerSpec extends PlaySpec with BeforeAndAfterEach {
   private val mockPort = 9090
   private val mockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().port(mockPort))
+  private val explorer = new Explorer
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -32,7 +33,7 @@ class ExplorerSpec extends PlaySpec with BeforeAndAfterEach {
             .withHeader("Content-Type", "application/json")
             .withBody(fromFile("test/resources/boxes.json").mkString)
             .withStatus(200)))
-      val res = Explorer.getUnspentBoxes(address)
+      val res = explorer.getUnspentBoxes(address)
       res.length mustBe 2
       res.head.tokens mustBe Seq(("1a6a8c16e4b1cc9d73d03183565cfb8e79dd84198cb66beeed7d3463e0da2b98", 63))
       res(1).tokens mustBe Seq(("1a6a8c16e4b1cc9d73d03183565cfb8e79dd84198cb66beeed7d3463e0da2b98", 38))
@@ -48,7 +49,7 @@ class ExplorerSpec extends PlaySpec with BeforeAndAfterEach {
           .willReturn(aResponse()
             .withHeader("Content-Type", "application/json")
             .withStatus(404)))
-      val res = Explorer.getTxConfirmationNum(txId)
+      val res = explorer.getTxConfirmationNum(txId)
       res mustBe -1
     }
 
@@ -60,7 +61,7 @@ class ExplorerSpec extends PlaySpec with BeforeAndAfterEach {
             .withHeader("Content-Type", "application/json")
             .withBody(fromFile("test/resources/tx.json").mkString)
             .withStatus(200)))
-      val res = Explorer.getTxConfirmationNum(txId)
+      val res = explorer.getTxConfirmationNum(txId)
       res mustBe 5
     }
   }

@@ -8,9 +8,10 @@ import org.scalatestplus.play.PlaySpec
 
 import scala.io.Source.fromFile
 
-class ServerSpec extends PlaySpec with BeforeAndAfterEach {
+class serverSpec extends PlaySpec with BeforeAndAfterEach {
   private val mockPort = 9090
   private val mockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().port(mockPort))
+  private val server = new Server
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -30,7 +31,7 @@ class ServerSpec extends PlaySpec with BeforeAndAfterEach {
             .withHeader("Content-Type", "application/json")
             .withBody(fromFile("test/resources/member_teams.json").mkString)
             .withStatus(200)))
-      val res = Server.getTeams
+      val res = server.getTeams
       res.length mustBe 2
     }
 
@@ -41,7 +42,7 @@ class ServerSpec extends PlaySpec with BeforeAndAfterEach {
             .withHeader("Content-Type", "application/json")
             .withBody(fromFile("test/resources/team_proposals.json").mkString)
             .withStatus(200)))
-      val res = Server.getProposals(1)
+      val res = server.getProposals(1)
       res._1.id mustBe 1
       res._2.length mustBe 2
     }
@@ -53,7 +54,7 @@ class ServerSpec extends PlaySpec with BeforeAndAfterEach {
             .withHeader("Content-Type", "application/json")
             .withBody(fromFile("test/resources/team_approved_proposals.json").mkString)
             .withStatus(200)))
-      val res = Server.getApprovedProposals(1)
+      val res = server.getApprovedProposals(1)
       res.length mustBe 1
     }
 
@@ -64,7 +65,7 @@ class ServerSpec extends PlaySpec with BeforeAndAfterEach {
             .withHeader("Content-Type", "application/json")
             .withBody(fromFile("test/resources/proposal_unsigned_tx.json").mkString)
             .withStatus(200)))
-      val res = Server.getUnsignedTx(1)
+      val res = server.getUnsignedTx(1)
       res._1 mustBe true
       res._2.length must be > 1000
     }
@@ -75,7 +76,7 @@ class ServerSpec extends PlaySpec with BeforeAndAfterEach {
           .willReturn(aResponse()
             .withHeader("Content-Type", "application/json")
             .withStatus(404)))
-      val res = Server.getUnsignedTx(1)
+      val res = server.getUnsignedTx(1)
       res._1 mustBe false
     }
 
@@ -86,7 +87,7 @@ class ServerSpec extends PlaySpec with BeforeAndAfterEach {
             .withHeader("Content-Type", "application/json")
             .withBody(fromFile("test/resources/proposal_proofs.json").mkString)
             .withStatus(200)))
-      val res = Server.getProofs(4)
+      val res = server.getProofs(4)
       res.length mustBe 3
     }
 
@@ -97,7 +98,7 @@ class ServerSpec extends PlaySpec with BeforeAndAfterEach {
             .withHeader("Content-Type", "application/json")
             .withBody(fromFile("test/resources/team_members.json").mkString)
             .withStatus(200)))
-      val res = Server.getMembers(3)
+      val res = server.getMembers(3)
       res.length mustBe 5
       res.count(_.pk == Conf.pk) mustBe 1
     }
@@ -109,7 +110,7 @@ class ServerSpec extends PlaySpec with BeforeAndAfterEach {
             .withHeader("Content-Type", "application/json")
             .withBody(fromFile("test/resources/proposal_commitments.json").mkString)
             .withStatus(200)))
-      val res = Server.getCommitments(4)
+      val res = server.getCommitments(4)
       res.length mustBe 4
       res.count(_.isRejected) mustBe 1
     }

@@ -12,6 +12,8 @@ import scala.io.Source.fromFile
 class NodeSpec extends PlaySpec with BeforeAndAfterEach {
   private val mockPort = 9090
   private val mockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().port(mockPort))
+  private val explorer = new Explorer // no need to mock here actually
+  private val node = new Node(explorer)
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -48,25 +50,25 @@ class NodeSpec extends PlaySpec with BeforeAndAfterEach {
 
   "generate tx" must {
     "return false because of not enough ergs" in {
-      val res = Node.generateUnsignedTx("someAddr", 1e8.toLong, "destAddr")
+      val res = node.generateUnsignedTx("someAddr", 1e8.toLong, "destAddr")
       res._1 mustBe false
     }
 
     "return false because not enough token available" in {
       val tokenId = "1a6a8c16e4b1cc9d73d03183565cfb8e79dd84198cb66beeed7d3463e0da2b98"
-      val res = Node.generateUnsignedTx("someAddr", 1e6.toLong, "destAddr", tokenId, 70)
+      val res = node.generateUnsignedTx("someAddr", 1e6.toLong, "destAddr", tokenId, 70)
       res._1 mustBe false
     }
 
     "return false because generating tx will result in token loss" in {
       val tokenId = "1a6a8c16e4b1cc9d73d03183565cfb8e79dd84198cb66beeed7d3463e0da2b98"
-      val res = Node.generateUnsignedTx("someAddr", 8996000, "destAddr", tokenId, 50)
+      val res = node.generateUnsignedTx("someAddr", 8996000, "destAddr", tokenId, 50)
       res._1 mustBe false
     }
 
     "generate tx with proper change for erg and tokens" in {
       val tokenId = "1a6a8c16e4b1cc9d73d03183565cfb8e79dd84198cb66beeed7d3463e0da2b98"
-      val res = Node.generateUnsignedTx("someAddr", 1e6.toLong, "destAddr", tokenId, 50)
+      val res = node.generateUnsignedTx("someAddr", 1e6.toLong, "destAddr", tokenId, 50)
       res._1 mustBe true
       val requests = mockServer.findAll(postRequestedFor(urlPathEqualTo("/wallet/transaction/generateUnsigned")));
       requests.size() mustBe 1

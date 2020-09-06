@@ -1,11 +1,13 @@
 package utils
 
+import javax.inject.Singleton
 import models.{Commitment, Member, Proof, Request, Team}
 import play.api.Logger
 import play.api.libs.json._
 import scalaj.http.Http
 
-object Server {
+@Singleton
+class Server {
   private val logger: Logger = Logger(this.getClass)
   private val defaultHeader: Seq[(String, String)] = Seq[(String, String)](("Content-Type", "application/json"))
 

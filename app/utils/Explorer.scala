@@ -1,10 +1,12 @@
 package utils
 
+import javax.inject.Singleton
 import models.Box
 import play.api.libs.json._
 import scalaj.http.Http
 
-object Explorer {
+@Singleton
+class Explorer {
   private val defaultHeader: Seq[(String, String)] = Seq[(String, String)](("Content-Type", "application/json"))
 
   /**
