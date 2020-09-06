@@ -1,0 +1,78 @@
+{
+  "team": {
+    "name": "Ergo Foundation",
+    "description": "EF",
+    "address": "BAJTURFtXG1kk7i5qW4JcYntLvYK2GSuRyWfSz3ZDHUf1vPGoVi3hp4fRWe5uh9RkqvYpgHEBKhb4Gv6wtRT9h4bZHVUg3fDkbyjAFNG6nrHEgky2T9ByhfAQo5mWF7m1iuGSVo258DaCSuqzMPkKPZMkYST2ekxgkbttzMzJ5aNiqkEsJmVs3yvPZGjX8Q5YNwzH7wQBpVN7uGo2qR54c29kZ3gepSMoa9EHNdMudVbSGYJZAbfvmVKT8sQtDqjysGJD2jdZ6yXf2a8Gs6rokwEr5g268MTFBbTVnWPGMSdbCASC9Fk9JkPQnBjmfEnoM8",
+    "assetName": "ERG",
+    "tokenId": "",
+    "id": 1
+  },
+  "memberId": 1,
+  "proposals": [
+    {
+      "title": "Some App",
+      "amount": 0.01,
+      "description": "Some explanation!",
+      "address": "9gAKeRu1W4Dh6adWXnnYmfqjCTnxnSMtym2LPPMPErCkusCd6F3",
+      "teamId": 1,
+      "status": "Pending Approval",
+      "id": 1,
+      "commitments": []
+    },
+    {
+      "title": "ICPC LOCAL 2020",
+      "amount": 0.01,
+      "description": "TEST",
+      "address": "4MQyML64GnzMxZgm",
+      "teamId": 1,
+      "status": "Approved",
+      "id": 33,
+      "commitments": [
+        {
+          "memberId": 1,
+          "a": "0305c87fd1a1d848156e7d4f4d97dc9f5defee1836bc80a5b6f35ee8fe26701882",
+          "member": {
+            "pk": "03ea59662233a850d5c267876a8f027a15d15d20eb1ae8aa66d29538e251cdf6cd",
+            "teamId": 1,
+            "nickName": "alice",
+            "id": 1
+          },
+          "requestId": 33
+        },
+        {
+          "memberId": 2,
+          "a": "02990fee53647d6f9840686183b509ad3b2a3801e1f87acf9d95b1677dae42d3c2",
+          "member": {
+            "pk": "0369b4b99c4a7bcd302f1806fb8532b31d1b77e5b39e068ea2ae8dc0bfa34ab0c6",
+            "teamId": 1,
+            "nickName": "bob",
+            "id": 2
+          },
+          "requestId": 33
+        },
+        {
+          "memberId": 3,
+          "a": "03e9c6ab0ee5f5e980fcb75a933d5d5c1baa75a667f9ba00fc6c4b7e9314aa5775",
+          "member": {
+            "pk": "03bd78e4729aa8b6e615da69c193afa0915a907709ad78d84b54480ba635f6d2b8",
+            "teamId": 1,
+            "nickName": "carol",
+            "id": 3
+          },
+          "requestId": 33
+        },
+        {
+          "memberId": 4,
+          "a": "02df1f0b984b99912baab81bb764c1e96125278b477c3622f324f8a299ce533355",
+          "member": {
+            "pk": "025f2cd0d0eee0f65654fb61cc7eff7ea7582144c59e9e1a14f239849eb2280d02",
+            "teamId": 1,
+            "nickName": "john",
+            "id": 4
+          },
+          "requestId": 33
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+[
+  {
+    "memberId": 10,
+    "requestId": 4,
+    "proof": [
+      {
+        "type": "dlog",
+        "a": "03bd7db765b2bb5b438f77223644934b69bc58457dad93f9194fd1f72cec6585ff",
+        "pubkey": {
+          "op": -51,
+          "h": "0354efc32652cad6cf1231be987afa29a686af30b5735995e3ce51339c4d0ca380"
+        },
+        "hint": "cmtReal"
+      },
+      {
+        "hint": "proofReal",
+        "challenge": "cfa2ccfda7a5334e3a0f0d9c1c7dc9f28b8ff441fd367e00",
+        "pubkey": {
+          "op": -51,
+          "h": "0354efc32652cad6cf1231be987afa29a686af30b5735995e3ce51339c4d0ca380"
+        },
+        "proof": "cfa2ccfda7a5334e3a0f0d9c1c7dc9f28b8ff441fd367e00cad44cd464b049c6df3ef082ea4efe09bc4d8acec91d6a605445eb0225e1f516"
+      },
+      {
+        "type": "dlog",
+        "a": "022a3acddbe6628e36a53229ccca6851d7960d8c34ab6513ee2170aa1c5c557989",
+        "pubkey": {
+          "op": -51,
+          "h": "0327e65711a59378c59359c3e1d0f7abe906479eccb76094e50fe79d743ccc15e6"
+        },
+        "hint": "cmtSimulated"
+      },
+      {
+        "hint": "proofSimulated",
+        "challenge": "81017db41beb74d255a91d629738bf33e7225b1467755be3",
+        "pubkey": {
+          "op": -51,
+          "h": "0327e65711a59378c59359c3e1d0f7abe906479eccb76094e50fe79d743ccc15e6"
+        },
+        "proof": "81017db41beb74d255a91d629738bf33e7225b1467755be3cca67fc499e8566fba0ae2078e77aa0d2fa1bdc1d5023ea05b92a613b389d451"
+      },
+      {
+        "type": "dlog",
+        "a": "025975555f1ad3609132ceaf58a4b00b30f4ac8338915ee83137bd9560e71d8077",
+        "pubkey": {
+          "op": -51,
+          "h": "0369b4b99c4a7bcd302f1806fb8532b31d1b77e5b39e068ea2ae8dc0bfa34ab0c6"
+        },
+        "hint": "cmtSimulated"
+      },
+      {
+        "hint": "proofSimulated",
+        "challenge": "d6c80d7316f18ff01b1d6af447221cf2d0484e56f668ff73",
+        "pubkey": {
+          "op": -51,
+          "h": "0369b4b99c4a7bcd302f1806fb8532b31d1b77e5b39e068ea2ae8dc0bfa34ab0c6"
+        },
+        "proof": "d6c80d7316f18ff01b1d6af447221cf2d0484e56f668ff73bb69ecaac6c43610fbb9774e48c4841cd8561d2354737add75821f1998cba433"
+      }
+    ],
+    "simulated": true
+  },
+  {
+    "memberId": 7,
+    "requestId": 4,
+    "proof": [
+      {
+        "type": "dlog",
+        "a": "02a275146c378e595d4b4ee5821ab51464deea5313e3264e31790ae59b14606afa",
+        "pubkey": {
+          "op": -51,
+          "h": "03ea59662233a850d5c267876a8f027a15d15d20eb1ae8aa66d29538e251cdf6cd"
+        },
+        "hint": "cmtReal"
+      },
+      {
+        "hint": "proofReal",
+        "challenge": "7e2d98d4e51d3e9aa48c5c704e00da70cce59921c19d35a5",
+        "pubkey": {
+          "op": -51,
+          "h": "03ea59662233a850d5c267876a8f027a15d15d20eb1ae8aa66d29538e251cdf6cd"
+        },
+        "proof": "7e2d98d4e51d3e9aa48c5c704e00da70cce59921c19d35a52e1fd952a7c2acb768e79c5fc0a55a5630bc1628cab850f3e365210546babf4f"
+      }
+    ],
+    "simulated": false
+  },
+  {
+    "memberId": 11,
+    "requestId": 4,
+    "proof": [
+      {
+        "type": "dlog",
+        "a": "028e9ebc3a18bd8554d2291bfc48ca8d5f7b5742dbbb1cf7a95dd2293cae644e83",
+        "pubkey": {
+          "op": -51,
+          "h": "03bd78e4729aa8b6e615da69c193afa0915a907709ad78d84b54480ba635f6d2b8"
+        },
+        "hint": "cmtReal"
+      },
+      {
+        "hint": "proofReal",
+        "challenge": "986bbc3aaabfc86c74bb7a0acc676a33bce5e1036c2bda90",
+        "pubkey": {
+          "op": -51,
+          "h": "03bd78e4729aa8b6e615da69c193afa0915a907709ad78d84b54480ba635f6d2b8"
+        },
+        "proof": "986bbc3aaabfc86c74bb7a0acc676a33bce5e1036c2bda908cf2fc43d616bb4fa1085ddd8a6b6b599469e01d86d7eb93ad8bc41ef5770470"
+      }
+    ],
+    "simulated": false
+  }
+]

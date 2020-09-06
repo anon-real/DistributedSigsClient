@@ -1,0 +1,26 @@
+[
+  {
+    "team": {
+      "name": "Ergo Foundation",
+      "description": "EF",
+      "address": "BAJTURFtXG1kk7i5qW4JcYntLvYK2GSuRyWfSz3ZDHUf1vPGoVi3hp4fRWe5uh9RkqvYpgHEBKhb4Gv6wtRT9h4bZHVUg3fDkbyjAFNG6nrHEgky2T9ByhfAQo5mWF7m1iuGSVo258DaCSuqzMPkKPZMkYST2ekxgkbttzMzJ5aNiqkEsJmVs3yvPZGjX8Q5YNwzH7wQBpVN7uGo2qR54c29kZ3gepSMoa9EHNdMudVbSGYJZAbfvmVKT8sQtDqjysGJD2jdZ6yXf2a8Gs6rokwEr5g268MTFBbTVnWPGMSdbCASC9Fk9JkPQnBjmfEnoM8",
+      "assetName": "ERG",
+      "tokenId": "",
+      "id": 1
+    },
+    "memberId": 1,
+    "pendingNum": 1
+  },
+  {
+    "team": {
+      "name": "Ergo Foundation2",
+      "description": "EF with token asset",
+      "address": "BAJTURFtXG1kk7i5qW4JcYntLvYK2GSuRyWfSz3ZDHUf1vPGoVi3hp4fRWe5uh9RkqvYpgHEBKhb4Gv6wtRT9h4bZHVUg3fDkbyjAFNG6nrHEgky2T9ByhfAQo5mWF7m1iuGSVo258DaCSuqzMPkKPZMkYST2ekxgkbttzMzJ5aNiqkEsJmVs3yvPZGjX8Q5YNwzH7wQBpVN7uGo2qR54c29kZ3gepSMoa9EHNdMudVbSGYJZAbfvmVKT8sQtDqjysGJD2jdZ6yXf2a8Gs6rokwEr5g268MTFBbTVnWPGMSdbCASC9Fk9JkPQnBjmfEnoM8",
+      "assetName": "Other Token",
+      "tokenId": "d01bdce3959ff6b675f7ab40ec2479ca5ce1edf3ae6314631f09c0f9807752aa",
+      "id": 2
+    },
+    "memberId": 7,
+    "pendingNum": 0
+  }
+]
