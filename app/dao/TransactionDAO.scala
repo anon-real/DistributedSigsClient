@@ -50,4 +50,12 @@ class TransactionDAO @Inject() (protected val dbConfigProvider: DatabaseConfigPr
     val res = db.run(transactions.filter(_.requestId === reqId).exists.result)
     Await.result(res, 5.second)
   }
+
+  /**
+   * deletes all txs from db
+   */
+  def deleteAll(): Unit = {
+    val res = db.run(transactions.delete)
+    Await.result(res, 5.second)
+  }
 }

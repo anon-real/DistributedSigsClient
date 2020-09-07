@@ -63,4 +63,12 @@ class SecretDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     val res = db.run(secrets.filter(_.requestId === reqId).result.head)
     Await.result(res, 5.second)
   }
+
+  /**
+   * deletes all secrets from db
+   */
+  def deleteAll(): Unit = {
+    val res = db.run(secrets.delete)
+    Await.result(res, 5.second)
+  }
 }
