@@ -18,7 +18,7 @@ Your node must support distributed signatures (currently, distributed-sig branch
 To run the code in development run `sbt "run 9001"` in the main directory to start the client. Load the UI in http://localhost:9001.
 replace 9001 with your desired port.
 ### Jar file
-You can download the client's jar file [here](releases). To run the client app:
+You can download the client's jar file [here](/releases). To run the client app:
 ```bash
 java -jar -Dconfig.file="path/to/your/config/file" ZKTreasury-client-{version}.jar
 ```
