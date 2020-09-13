@@ -28,10 +28,7 @@ class Jobs(transactionHandler: TransactionHandler, proofHandler: ProofHandler, s
     case JobsUtil.handleApproved =>
       updateTeams()
       logger.info("Handling approved proposals...")
-      Try(transactionHandler.handleTxGeneration(teams))
       Try(proofHandler.handleProof(teams))
   }
-
-
 }
 

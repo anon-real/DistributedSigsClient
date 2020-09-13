@@ -4,8 +4,10 @@ import dao.{SecretDAO, TransactionDAO}
 import javax.inject.Inject
 import models.{Team, Transaction}
 import play.api.Logger
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsObject, JsValue, Json}
 import utils.{Conf, Explorer, Node, Server}
+
+import scala.collection.mutable
 
 class ProofHandler @Inject() (node: Node, explorer: Explorer, server: Server, secrets: SecretDAO, transactions: TransactionDAO) {
   private val logger: Logger = Logger(this.getClass)
@@ -23,19 +25,30 @@ class ProofHandler @Inject() (node: Node, explorer: Explorer, server: Server, se
           if (!created) logger.info(s"unsigned tx for proposal ${prop.id} is not created yet.")
           else {
             val secret = secrets.byRequestId(prop.id)
-            val cmnts = server.getCommitments(prop.id).filter(_.a.nonEmpty).filterNot(_.a.equals(secret.a))
+            val cmnts = server.getCommitments(prop.id).filter(!_.isRejected).filterNot(_.a.equals(secret.a))
             val proofs = server.getProofs(prop.id)
             if (proofs.size == cmnts.size + 1) {
 
               logger.info(s"all proofs have been gathered for proposal ${prop.id}, we will assemble the tx")
-              val fProofs: Seq[String] = proofs.map(proof => {
-                Json.parse(proof.proof).as[Seq[JsValue]].map(_.toString()).mkString(",")
+              val mp: mutable.Map[String, Seq[String]] = mutable.Map.empty
+              proofs.foreach(proof => {
+                val js = Json.parse(proof.proof)
+                val keys = js.as[JsObject].keys
+                keys.foreach(key => {
+                  val prev: Seq[String] = mp.getOrElse(key, Seq())
+                  mp(key) = prev ++ (js \ key).asOpt[Seq[JsValue]].getOrElse(Seq()).map(Json.stringify)
+                })
               })
+
+              val js = mp.map(a =>
+                s"""
+                   |  "${a._1}": [${a._2.mkString(",")}]
+                   |""".stripMargin)
 
               val (ok, signed) = {
                 if (transactions.exists(prop.id)) (true, transactions.byId(prop.id).toString)
                 else {
-                  var (ok, signed) = node.signTx(tx, secret, fProofs)
+                  var (ok, signed) = node.signTx(tx, secret, s"""{${js.mkString(",")}}""")
                   if (ok && node.isTxOk(signed)) {
                     transactions.insert(Transaction(prop.id, signed.getBytes("utf-16")))
                   } else {
@@ -63,20 +76,21 @@ class ProofHandler @Inject() (node: Node, explorer: Explorer, server: Server, se
               if (proofs.exists(proof => proof.proof.contains(Conf.pk))) {
                 logger.info(s"we have already generated our proof for proposal ${prop.id}, waiting for others...")
               } else {
-                val fProofs: Seq[String] = proofs.filter(_.simulated).map(proof => {
-                  Json.parse(proof.proof).as[Seq[JsValue]].map(_.toString()).mkString(",")
-                }) ++ cmnts.map(cmt => {
-                  s"""{
-                     |  "hint": "cmtReal",
-                     |  "type": "dlog",
-                     |  "pubkey":{
-                     |     "op": -51,
-                     |     "h": "${cmt.member.pk}"
-                     |  },
-                     |  "a": "${cmt.a}"
-                     |}""".stripMargin
+                val mp: mutable.Map[String, Seq[String]] = mutable.Map.empty
+                (proofs.filter(_.simulated).map(_.proof) ++ cmnts.map(_.a)).foreach(proof => {
+                  val js = Json.parse(proof)
+                  val keys = js.as[JsObject].keys
+                  keys.foreach(key => {
+                    val prev: Seq[String] = mp.getOrElse(key, Seq())
+                    mp(key) = prev ++ (js \ key).asOpt[Seq[JsValue]].getOrElse(Seq()).map(Json.stringify)
+                  })
                 })
-                val (ok, signed) = node.signTx(tx, secret, fProofs)
+
+                val js = mp.map(a =>
+                  s"""
+                    |  "${a._1}": [${a._2.mkString(",")}]
+                    |""".stripMargin)
+                val (ok, signed) = node.signTx(tx, secret, s"""{${js.mkString(",")}}""")
                 if (!ok) {
                   logger.error(s"could not sign tx for proposal ${prop.id}")
                 } else {

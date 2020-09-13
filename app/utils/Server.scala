@@ -32,9 +32,9 @@ class Server {
     val res = Http(s"${Conf.serverUrl}/proposal/$teamId/${Conf.pk}").headers(defaultHeader).asString
     if (res.isError) throw new Throwable(s"Error getting info from server! $res")
     val js = Json.parse(res.body)
-    val memberId = (js \\ "memberId").head.as[Long]
-    val team = Team((js \\ "team").head, memberId)
-    val proposals = (js \\ "proposals").head.as[List[JsValue]].map(req => Request(req))
+    val memberId = (js \ "memberId").as[Long]
+    val team = Team((js \ "team").as[JsValue], memberId)
+    val proposals = (js \ "proposals").as[List[JsValue]].map(req => Request(req))
     (team, proposals)
   }
 
@@ -47,6 +47,19 @@ class Server {
     if (res.isError) throw new Throwable(s"Error getting info from server! $res")
     val js = Json.parse(res.body)
     js.as[List[JsValue]].map(req => Request(req))
+  }
+
+
+  /**
+   * gets proposal from server
+   * @param reqId proposal id
+   * @return proposal
+   */
+  def getProposalById(reqId: Long): (Team, Request) = {
+    val res = Http(s"${Conf.serverUrl}/proposal/byId/$reqId").headers(defaultHeader).asString
+    if (res.isError) throw new Throwable(s"Error getting info from server! $res")
+    val js = Json.parse(res.body)
+    (Team((js \ "team").as[JsValue]), Request((js \ "proposal").as[JsValue]))
   }
 
   /**
@@ -109,7 +122,7 @@ class Server {
   def approveProposal(reqId: Long, memberId: Long, a: String): Boolean = {
     val res = Http(s"${Conf.serverUrl}/proposal/$reqId/commitment").postData(
       s"""{
-        |  "a": "$a",
+        |  "a": $a,
         |  "memberId": $memberId
         |}""".stripMargin).headers(defaultHeader).asString
     !res.isError

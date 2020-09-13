@@ -2,7 +2,7 @@ package models
 
 import java.nio.charset.StandardCharsets
 
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import utils.Conf
 import utils.Util._
 
@@ -78,7 +78,7 @@ object Request {
 case class Commitment(member: Member, a: String, reqId: Long, memId: Long) {
   def isMine: Boolean = member.pk == Conf.pk
 
-  def isRejected: Boolean = a.isEmpty
+  def isRejected: Boolean = a == "{}"
 
   def isApproved: Boolean = !isRejected
 
@@ -93,7 +93,7 @@ case class Commitment(member: Member, a: String, reqId: Long, memId: Long) {
 object Commitment {
   def apply(cmt: JsValue): Commitment = {
     val member = Member((cmt \ "member").as[JsValue])
-    val a = (cmt \ "a").as[String]
+    val a = Json.stringify((cmt \ "a").get)
     val reqId = (cmt \ "requestId").as[Long]
     val memId = (cmt \ "memberId").as[Long]
     Commitment(member, a, reqId, memId)

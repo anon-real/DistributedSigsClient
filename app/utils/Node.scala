@@ -18,14 +18,17 @@ class Node @Inject()(explorer: Explorer) {
    *
    * @return (a, r)
    */
-  def produceCommitment(): (String, String) = {
-    val res = Http(s"${Conf.nodeUrl}/script/generateCommitment").postData(
+  def produceCommitment(tx: String): (String, String) = {
+    val res = Http(s"${Conf.nodeUrl}/wallet/generateCommitments").postData(
       s"""{
-         |  "op": -51,
-         |  "h": "${Conf.pk}"
+         |  "tx": $tx,
+         |  "secrets": {
+         |    "dlog": [${Conf.secretSeq.map(sec => s""""$sec"""").mkString(",")}]
+         |  }
          |}""".stripMargin).headers(defaultHeader).asString
     val js = Json.parse(res.body)
-    ((js \\ "a").head.as[String], (js \\ "r").head.as[String])
+
+    (Json.stringify((js \ "publicHints").get), Json.stringify((js \ "secretHints").get))
   }
 
   /**
@@ -132,28 +135,17 @@ class Node @Inject()(explorer: Explorer) {
    * @param proofs other partial proofs needed
    * @return (success, tx) signs the tx, used for simulation, partial proof generation and signing the assembled tx
    */
-  def signTx(tx: String, secret: Secret, proofs: Seq[String]): (Boolean, String) = {
-    val mySec =
-      s"""
-         |{
-         |      "hint": "cmtWithSecret",
-         |      "type": "dlog",
-         |      "pubkey": {
-         |         "op": -51,
-         |         "h": "${Conf.pk}"
-         |      },
-         |      "a": "${secret.a}" ,
-         |      "secret": "${secret.r}"
-         |     }
-         |""".stripMargin
-    val allProofs = (proofs :+ mySec).reverse
+  def signTx(tx: String, secret: Secret, proofs: String): (Boolean, String) = {
     val request =
       s"""{
          |  "tx": $tx,
          |  "secrets": {
          |    "dlog": [${Conf.secretSeq.map(sec => s""""$sec"""").mkString(",")}]
          |  },
-         |  "hints": [${allProofs.mkString(",")}]
+         |  "hints": {
+         |    "secretHints": ${secret.r},
+         |    "publicHints": $proofs
+         |  }
          |}""".stripMargin
 
     val res = Http(s"${Conf.nodeUrl}/wallet/transaction/sign").postData(request).headers(defaultHeader).asString
@@ -187,7 +179,7 @@ class Node @Inject()(explorer: Explorer) {
          |}""".stripMargin)
     val request =
       s"""{
-         |  "transaction": $tx,
+         |  "tx": $tx,
          |  "real": [${realR.mkString(",")}],
          |  "simulated": [${simulatedR.mkString(",")}]
          |}""".stripMargin
@@ -198,7 +190,8 @@ class Node @Inject()(explorer: Explorer) {
       (false, "")
     } else {
       logger.info("successfully extracted hints")
-      (true, res.body)
+      val js = Json.parse(res.body)
+      (true, Json.stringify((js \ "publicHints").as[JsValue]))
     }
   }
 

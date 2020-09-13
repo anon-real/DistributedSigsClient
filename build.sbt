@@ -1,8 +1,8 @@
 import sbt.Attributed
 
-name := "DistributedSigsClient"
+name := "ZKTreasury-client"
 
-version := "1.0"
+version := "0.1"
 
 lazy val `distributedsigsclient` = (project in file(".")).enablePlugins(PlayScala)
 
@@ -21,6 +21,8 @@ libraryDependencies ++= Seq(
   "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test,
   "com.github.tomakehurst" % "wiremock-standalone" % "2.27.1" % Test
 )
+
+assemblyJarName in assembly := s"${name.value}-${version.value}.jar"
 
 unmanagedResourceDirectories in Test <+= baseDirectory(_ / "target/web/public/test")
 

@@ -23,7 +23,7 @@
   },
   {
     "memberId": 8,
-    "a": "",
+    "a": {},
     "member": {
       "pk": "0369b4b99c4a7bcd302f1806fb8532b31d1b77e5b39e068ea2ae8dc0bfa34ab0c6",
       "teamId": 3,
