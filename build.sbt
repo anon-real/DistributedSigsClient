@@ -2,7 +2,7 @@ import sbt.Attributed
 
 name := "ZKTreasury-client"
 
-version := "0.1"
+version := "0.2"
 
 lazy val `distributedsigsclient` = (project in file(".")).enablePlugins(PlayScala)
 
