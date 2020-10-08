@@ -1,7 +1,7 @@
 package utils
 
 import javax.inject.{Inject, Singleton}
-import models.{Request, Secret, Team}
+import models.{Box, Request, Secret, Team}
 import play.api.Logger
 import play.api.libs.json._
 import scalaj.http.Http
@@ -53,7 +53,20 @@ class Node @Inject()(explorer: Explorer) {
   def generateUnsignedTx(sourceAddr: String, ergAmount: Long, destAddr: String, tokenId: String = "", tokenAmount: Long = 0L): (Boolean, String) = {
     val fee = 2000000
     val needErg = ergAmount + fee
-    val boxes = explorer.getUnspentBoxes(sourceAddr)
+    val boxes = {
+      val all = explorer.getUnspentBoxes(sourceAddr).sortBy(box => box.value).reverse
+      if (tokenId.isEmpty) {
+        var enough: Seq[Box] = Seq()
+        (1 to all.length).foreach(i => {
+          if (enough.isEmpty && all.slice(0, i).map(_.value).sum >= needErg) {
+            enough = all.slice(0, i)
+          }
+        })
+        if (enough.isEmpty) enough = all
+        enough
+      }
+      else all
+    }
 
     val sm = boxes.map(_.value).sum
     val changeTokens: mutable.Map[String, Long] = mutable.Map.empty
