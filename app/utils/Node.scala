@@ -197,7 +197,7 @@ class Node @Inject()(explorer: Explorer) {
          |  "simulated": [${simulatedR.mkString(",")}]
          |}""".stripMargin
 
-    val res = Http(s"${Conf.nodeUrl}/script/extractHints").postData(request).headers(defaultHeader).asString
+    val res = Http(s"${Conf.nodeUrl}/wallet/extractHints").postData(request).headers(defaultHeader).asString
     if (res.isError) {
       logger.error(s"could extract hints: ${res.body}")
       (false, "")
